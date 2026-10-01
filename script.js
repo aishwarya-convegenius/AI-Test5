@@ -1,7 +1,7 @@
 // Practice Bot engine. A small scripted chat — no live AI connection.
 // Node IDs follow the SCENE_INTENT_OUTCOME pattern from the conversation
 // flow spec (see each cluster's `id`), even though this build renders
-// them as one continuous chat rather than separate platform nodes.
+// them as one exchange per slide rather than separate platform nodes.
 // Nothing here is saved or sent anywhere until the learner downloads
 // their own results.
 
@@ -73,29 +73,93 @@ var CLUSTERS = [
   }
 ];
 
+// ---------------------------------------------------------------------
+// Slide engine (round 2). Every slide fits one screen; the chat never
+// scrolls. Each drill is its own slide showing ONE exchange: the
+// learner's previous reply (small line), the current bot turn and the
+// reply options. The full transcript is kept in memory (state.transcript)
+// and included in the download.
+//
+// Slide map: 0 Intro · 1 Welcome · 2..6 Drill 1..5 · 7 Recap · 8 Wrap-up
+// ---------------------------------------------------------------------
+var SLIDE_INTRO = 0;
+var SLIDE_WELCOME = 1;
+var SLIDE_FIRST_DRILL = 2;
+var SLIDE_RECAP = SLIDE_FIRST_DRILL + CLUSTERS.length;   // 7
+var SLIDE_WRAP = SLIDE_RECAP + 1;                         // 8
+var TOTAL_SLIDES = SLIDE_WRAP + 1;                        // 9
+
 document.addEventListener('DOMContentLoaded', function () {
   var chatWindow = document.getElementById('chat-window');
-  var dots = document.querySelectorAll('.progress-dot');
+  var recapWindow = document.getElementById('recap-window');
+  var chatTitle = document.getElementById('chat-title');
+  var chatEyebrow = document.getElementById('chat-eyebrow');
+  var backBtn = document.getElementById('back-btn');
+  var nextBtn = document.getElementById('next-btn');
+  var nextLabel = document.getElementById('next-label');
+  var pageCount = document.getElementById('page-count');
+  var dotsWrap = document.getElementById('progress-dots');
 
-  var state = { clusterIndex: -1, attempts: 0, chosen: [], results: [] };
+  var sections = {
+    intro: document.getElementById('slide-intro'),
+    chat: document.getElementById('slide-chat'),
+    recap: document.getElementById('slide-recap'),
+    wrap: document.getElementById('slide-wrap')
+  };
 
-  function scrollDown() {
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  var state;
+  var turns = {};          // slide index -> turn element (kept so Back can show it)
+  var activeControls = null;
+  var hintSlot = null;
+
+  function freshState() {
+    return {
+      view: 0,             // slide on screen
+      live: 0,             // furthest slide reached
+      started: false,
+      clusterIndex: -1,
+      attempts: 0,
+      chosen: [],
+      resolved: false,     // current drill finished?
+      results: [],
+      transcript: []
+    };
   }
 
-  function setDot(i, cls) {
-    if (dots[i]) {
-      dots[i].classList.remove('active', 'done');
-      dots[i].classList.add(cls);
+  // ---------- progress dots ----------
+  for (var d = 0; d < TOTAL_SLIDES; d++) {
+    var dot = document.createElement('span');
+    dot.className = 'progress-dot';
+    dotsWrap.appendChild(dot);
+  }
+  var dots = dotsWrap.querySelectorAll('.progress-dot');
+
+  // ---------- transcript ----------
+  function log(who, text) { state.transcript.push({ who: who, text: text }); }
+
+  // ---------- turn containers ----------
+  function turnFor(v) {
+    if (!turns[v]) {
+      var t = document.createElement('div');
+      t.className = 'turn';
+      chatWindow.appendChild(t);
+      turns[v] = t;
     }
+    return turns[v];
+  }
+  var target = null;   // turn element messages are written into
+  function newTurn(v) {
+    target = turnFor(v);
+    target.innerHTML = '';
+    activeControls = null;
+    hintSlot = null;
   }
 
   function addRow(side, bubbleEl) {
     var row = document.createElement('div');
     row.className = 'msg-row ' + side;
     row.appendChild(bubbleEl);
-    chatWindow.appendChild(row);
-    scrollDown();
+    target.appendChild(row);
     return row;
   }
 
@@ -103,6 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var b = document.createElement('div');
     b.className = 'bubble bot' + (extraClass ? ' ' + extraClass : '');
     b.textContent = text;
+    log('Bot', text);
     return addRow('bot', b);
   }
 
@@ -110,14 +175,24 @@ document.addEventListener('DOMContentLoaded', function () {
     var b = document.createElement('div');
     b.className = 'bubble scenario';
     b.textContent = '“' + text + '”';
+    log('Bot', '“' + text + '”');
     return addRow('bot', b);
   }
 
-  function addUser(text) {
-    var b = document.createElement('div');
-    b.className = 'bubble user';
-    b.textContent = text;
-    return addRow('user', b);
+  // The learner's previous reply stays on screen as a small line.
+  function addPrevReply(text) {
+    var line = document.createElement('div');
+    line.className = 'prev-reply';
+    var who = document.createElement('span');
+    who.className = 'prev-who';
+    who.textContent = 'You';
+    var said = document.createElement('span');
+    said.className = 'bubble user';
+    said.textContent = text;
+    line.appendChild(who);
+    line.appendChild(said);
+    target.appendChild(line);
+    log('You', text);
   }
 
   function addReveal(text) {
@@ -128,15 +203,15 @@ document.addEventListener('DOMContentLoaded', function () {
     label.textContent = "Here's the answer";
     b.appendChild(label);
     b.appendChild(document.createTextNode(text));
+    log('Bot', "Here's the answer: " + text);
     return addRow('bot', b);
   }
 
-  var activeControls = null;
+  function addCorrectBubble(text) { addBot(text, 'correct'); }
+  function addIncorrectBubble(text) { addBot(text, 'incorrect'); }
 
   function clearControls() {
-    if (activeControls && activeControls.parentNode) {
-      activeControls.parentNode.removeChild(activeControls);
-    }
+    if (activeControls && activeControls.parentNode) activeControls.parentNode.removeChild(activeControls);
     activeControls = null;
   }
 
@@ -155,9 +230,8 @@ document.addEventListener('DOMContentLoaded', function () {
       });
       wrap.appendChild(btn);
     });
-    chatWindow.appendChild(wrap);
+    target.appendChild(wrap);
     activeControls = wrap;
-    scrollDown();
     return wrap;
   }
 
@@ -170,7 +244,17 @@ document.addEventListener('DOMContentLoaded', function () {
     helpBtn.className = 'meta-btn';
     helpBtn.textContent = 'Need a hint?';
     helpBtn.addEventListener('click', function () {
-      addBot(cluster.help);
+      // One hint bubble per turn, placed above the options (no growing log).
+      if (!hintSlot) {
+        var b = document.createElement('div');
+        b.className = 'bubble bot hint';
+        hintSlot = document.createElement('div');
+        hintSlot.className = 'msg-row bot';
+        hintSlot.appendChild(b);
+        target.insertBefore(hintSlot, activeControls);
+      }
+      hintSlot.firstChild.textContent = cluster.help;
+      log('Bot', cluster.help);
     });
     row.appendChild(helpBtn);
 
@@ -179,29 +263,21 @@ document.addEventListener('DOMContentLoaded', function () {
     skipBtn.className = 'meta-btn';
     skipBtn.textContent = 'Skip this one';
     skipBtn.addEventListener('click', function () {
-      row.remove();
-      clearControls();
+      log('You', 'Skip this one');
       startSkip(cluster);
     });
     row.appendChild(skipBtn);
 
-    chatWindow.appendChild(row);
-    scrollDown();
+    target.appendChild(row);
     return row;
   }
-
-  var metaRow = null;
 
   function askQuestion(cluster) {
     addQuickReplies(
       cluster.options.map(function (o) { return { label: o }; }),
-      function (label) {
-        if (metaRow) { metaRow.remove(); metaRow = null; }
-        addUser(label);
-        handleAnswer(cluster, label);
-      }
+      function (label) { handleAnswer(cluster, label); }
     );
-    metaRow = addMetaActions(cluster);
+    addMetaActions(cluster);
   }
 
   function handleAnswer(cluster, label) {
@@ -209,44 +285,37 @@ document.addEventListener('DOMContentLoaded', function () {
     state.chosen.push(label);
     var correctLabel = cluster.options[cluster.correctIndex];
 
+    newTurn(state.view);
+    addPrevReply(label);
+
     if (label === correctLabel) {
       addCorrectBubble(cluster.correctFeedback);
       recordResult(cluster, state.attempts === 1 ? 'mastered' : 'reviewed');
-      advance();
+      resolveDrill();
     } else if (state.attempts >= 2) {
       addIncorrectBubble(cluster.nudge);
       addReveal(cluster.reveal);
       recordResult(cluster, 'reviewed');
-      advance();
+      resolveDrill();
     } else {
+      // Second try: nudge, the same request again (it was on screen before), and the options.
       addIncorrectBubble(cluster.nudge);
+      if (cluster.scenario) addScenario(cluster.scenario);
       askQuestion(cluster);
     }
   }
 
-  function addIncorrectBubble(text) {
-    var b = document.createElement('div');
-    b.className = 'bubble incorrect';
-    b.textContent = text;
-    addRow('bot', b);
-  }
-
-  function addCorrectBubble(text) {
-    var b = document.createElement('div');
-    b.className = 'bubble correct';
-    b.textContent = text;
-    addRow('bot', b);
-  }
-
   function startSkip(cluster) {
+    newTurn(state.view);
     addBot('No problem — why are you skipping?');
     addQuickReplies(
       [{ label: 'Not sure' }, { label: 'Short on time' }, { label: 'Prefer to move on' }],
       function (label) {
-        addUser(label);
+        newTurn(state.view);
+        addPrevReply(label);
         addReveal(cluster.reveal);
         recordResult(cluster, 'skipped', label);
-        advance();
+        resolveDrill();
       }
     );
   }
@@ -263,9 +332,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  function advance() {
-    setDot(state.clusterIndex + 1, 'done');
-    startCluster(state.clusterIndex + 1);
+  // Drill finished: the feedback stays on screen; footer Next moves on.
+  function resolveDrill() {
+    state.resolved = true;
+    render();
   }
 
   function startCluster(i) {
@@ -273,32 +343,30 @@ document.addEventListener('DOMContentLoaded', function () {
     state.clusterIndex = i;
     state.attempts = 0;
     state.chosen = [];
-    setDot(i + 1, 'active');
+    state.resolved = false;
+    var v = SLIDE_FIRST_DRILL + i;
+    state.view = v;
+    state.live = v;
 
     var c = CLUSTERS[i];
-    addBot('Drill ' + (i + 1) + ' of ' + CLUSTERS.length + '.');
+    newTurn(v);
+    // "Drill N of 5." is now the slide title (logged so the transcript keeps it).
+    log('Bot', 'Drill ' + (i + 1) + ' of ' + CLUSTERS.length + '.');
     if (c.scenario) addScenario(c.scenario);
     addBot(c.question);
     askQuestion(c);
+    render();
   }
 
   function finish() {
-    setDot(6, 'active');
+    recapWindow.innerHTML = '';
+    target = recapWindow;
     addBot("Nice work! You've completed all 5 drills.");
-
     var masteredCount = state.results.filter(function (r) { return r.outcome === 'mastered'; }).length;
     addBot(masteredCount + ' of ' + CLUSTERS.length + ' correct on your first try.');
 
     var card = document.createElement('div');
     card.className = 'recap-card';
-
-    var heading = document.createElement('p');
-    heading.style.margin = '0 0 6px';
-    heading.style.fontWeight = '700';
-    heading.style.fontSize = '13.5px';
-    heading.textContent = 'Your recap';
-    card.appendChild(heading);
-
     var list = document.createElement('ul');
     list.className = 'recap-list';
     state.results.forEach(function (r, idx) {
@@ -315,28 +383,11 @@ document.addEventListener('DOMContentLoaded', function () {
       list.appendChild(li);
     });
     card.appendChild(list);
-    chatWindow.appendChild(card);
+    recapWindow.appendChild(card);
 
-    var stopRule = document.createElement('div');
-    stopRule.className = 'stop-rule';
-    stopRule.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A6B00" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg><div><span class="label">Reminder</span><p>Never type real names, marks, phone numbers or ID numbers into an AI tool. Use made-up details for practice.</p></div>';
-    chatWindow.appendChild(stopRule);
-
-    var downloadBtn = document.createElement('button');
-    downloadBtn.type = 'button';
-    downloadBtn.className = 'btn-download';
-    downloadBtn.textContent = 'Download my results';
-    downloadBtn.addEventListener('click', downloadResults);
-    chatWindow.appendChild(downloadBtn);
-
-    var restartBtn = document.createElement('button');
-    restartBtn.type = 'button';
-    restartBtn.className = 'btn-restart';
-    restartBtn.textContent = 'Start over';
-    restartBtn.addEventListener('click', restart);
-    chatWindow.appendChild(restartBtn);
-
-    scrollDown();
+    state.view = SLIDE_RECAP;
+    state.live = SLIDE_RECAP;
+    render();
   }
 
   function downloadResults() {
@@ -349,6 +400,8 @@ document.addEventListener('DOMContentLoaded', function () {
       lines.push('Outcome: ' + r.outcome + (r.skipReason ? ' (' + r.skipReason + ')' : ''));
       lines.push('');
     });
+    lines.push('Full conversation', '');
+    state.transcript.forEach(function (m) { lines.push(m.who + ': ' + m.text); });
     var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -360,20 +413,105 @@ document.addEventListener('DOMContentLoaded', function () {
     URL.revokeObjectURL(url);
   }
 
-  function restart() {
-    chatWindow.innerHTML = '';
-    state = { clusterIndex: -1, attempts: 0, chosen: [], results: [] };
-    dots.forEach(function (d, i) { d.classList.remove('active', 'done'); if (i === 0) d.classList.add('active'); });
-    init();
-  }
-
-  function init() {
+  function welcome() {
+    newTurn(SLIDE_WELCOME);
     addBot("Hi! I'm your practice bot for Framing and Refining.");
     addBot("I'll show you short requests. You tell me what's wrong, or which move fixes it. You get 2 tries before I help.");
-    addQuickReplies([{ label: 'Start', primary: true }], function () {
-      startCluster(0);
-    });
+    addQuickReplies([{ label: 'Start', primary: true }], begin);
   }
 
-  init();
+  function begin() {
+    if (state.started) return;
+    state.started = true;
+    log('You', 'Start');
+    clearControls();
+    startCluster(0);
+  }
+
+  function restart() {
+    chatWindow.innerHTML = '';
+    recapWindow.innerHTML = '';
+    turns = {};
+    state = freshState();
+    welcome();
+    state.view = SLIDE_WELCOME;
+    state.live = SLIDE_WELCOME;
+    render();
+  }
+
+  // ---------- navigation ----------
+  function isDrill(v) { return v >= SLIDE_FIRST_DRILL && v < SLIDE_RECAP; }
+
+  function canGoNext() {
+    var v = state.view;
+    if (v === SLIDE_WRAP) return false;
+    if (v < state.live) return true;
+    if (v === SLIDE_INTRO) return true;
+    if (v === SLIDE_WELCOME) return true;          // same as tapping Start
+    if (isDrill(v)) return state.resolved;
+    if (v === SLIDE_RECAP) return true;
+    return false;
+  }
+
+  function goNext() {
+    if (!canGoNext()) return;
+    var v = state.view;
+    if (v < state.live) { state.view = v + 1; render(); return; }
+    if (v === SLIDE_INTRO) { state.view = state.live = SLIDE_WELCOME; render(); return; }
+    if (v === SLIDE_WELCOME) { begin(); return; }
+    if (isDrill(v)) { startCluster(state.clusterIndex + 1); return; }
+    if (v === SLIDE_RECAP) { state.view = state.live = SLIDE_WRAP; render(); return; }
+  }
+
+  function goBack() {
+    if (state.view === 0) return;
+    state.view--;
+    render();
+  }
+
+  function render() {
+    var v = state.view;
+    sections.intro.classList.toggle('active', v === SLIDE_INTRO);
+    sections.chat.classList.toggle('active', v === SLIDE_WELCOME || isDrill(v));
+    sections.recap.classList.toggle('active', v === SLIDE_RECAP);
+    sections.wrap.classList.toggle('active', v === SLIDE_WRAP);
+
+    if (v === SLIDE_WELCOME || isDrill(v)) {
+      Object.keys(turns).forEach(function (k) { turns[k].hidden = (+k !== v); });
+      if (v === SLIDE_WELCOME) {
+        chatEyebrow.textContent = 'Practice Bot';
+        chatTitle.textContent = 'Meet your practice bot';
+      } else {
+        var i = v - SLIDE_FIRST_DRILL;
+        chatEyebrow.textContent = 'Practice Bot · ' + CLUSTERS[i].lane;
+        chatTitle.textContent = 'Drill ' + (i + 1) + ' of ' + CLUSTERS.length;
+      }
+    }
+
+    dots.forEach(function (dt, i) {
+      dt.classList.toggle('done', i < v);
+      dt.classList.toggle('active', i === v);
+    });
+    pageCount.textContent = (v + 1) + ' / ' + TOTAL_SLIDES;
+
+    backBtn.disabled = (v === 0);
+    var can = canGoNext();
+    nextBtn.disabled = !can;
+    nextLabel.textContent = (v === SLIDE_WELCOME && !state.started) ? 'Start' : 'Next';
+    // One amber per slide: go quiet when the chat owns the primary (Start chip) or Next can't be used.
+    var quiet = !can || (v === SLIDE_WELCOME && !state.started) || v === SLIDE_WRAP;
+    nextBtn.classList.toggle('is-quiet', quiet);
+  }
+
+  backBtn.addEventListener('click', goBack);
+  nextBtn.addEventListener('click', goNext);
+  document.getElementById('download-btn').addEventListener('click', downloadResults);
+  document.getElementById('restart-btn').addEventListener('click', restart);
+
+  state = freshState();
+  welcome();
+  render();
+
+  // Read-only hook for any recap/download tooling.
+  window.getPracticeBotTranscript = function () { return state.transcript.slice(); };
 });
