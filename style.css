@@ -372,3 +372,105 @@ h1{font-size:clamp(26px,4.4vw,36px);line-height:1.15;letter-spacing:-.01em;margi
   .slide-footer{padding:8px 0 10px}
   .nav-btn,.nav-btn.primary,.nav-btn.primary.is-quiet{min-height:42px;padding:10px 16px}
 }
+
+/* ESL upgrade (game-specific) */
+/* recap: results list in 2 columns so the quick check fits under it on short screens */
+#slide-recap .recap-list{grid-template-columns:1fr 1fr;column-gap:8px}
+#slide-recap .saa-work{display:flex;flex-direction:column;gap:12px}
+#slide-recap .saa-kit{margin:0}
+@media (max-width:700px){ #slide-recap .recap-list{grid-template-columns:1fr} }
+
+/* Game 9 designer assets (Oct 2026) */
+/* intro: five-drills flow diagram (right column on wide screens) */
+.g9-flow{margin:0;display:flex;justify-content:center}
+.g9-flow img{display:block;width:auto;max-width:100%;height:auto;max-height:calc(34vh / var(--z,1));object-fit:contain;border-radius:4.1% / 11.5%}
+/* practice-bot avatar beside every bot bubble */
+.msg-row.bot{align-items:flex-end;gap:8px}
+.g9-avatar{flex:none;width:28px;height:28px;border-radius:50%;display:block}
+/* reply-chip icons (request parts and refinement moves) */
+.qr-btn.g9-has-ic{display:inline-flex;align-items:center;gap:8px;padding-left:12px}
+.g9-chip-ic{width:22px;height:22px;flex:none;display:block}
+/* results: status icons */
+.recap-outcome{display:inline-flex;align-items:center;gap:6px}
+.g9-res-ic{width:20px;height:20px;flex:none;display:block}
+/* stamp rows: private-detail icons */
+.saa-row .saa-row-t{display:inline-flex;align-items:center;gap:10px}
+.g9-row-ic{width:24px;height:24px;flex:none;display:block}
+@media (max-width:640px){
+  .g9-avatar{width:24px;height:24px}
+  .msg-row.bot{gap:6px}
+  .g9-flow img{max-height:calc(26vh / var(--z,1))}
+}
+@media (max-height:700px) and (max-width:640px){
+  .g9-chip-ic{width:20px;height:20px}
+}
+/* results list: keep each row on one line now that it carries a status icon */
+@media (min-width:701px){ #slide-recap .saa-split{grid-template-columns:minmax(0,4fr) minmax(0,6fr)} }
+#slide-recap .recap-list li{align-items:center;padding:7px 10px;gap:8px}
+#slide-recap .recap-list li > span:first-child{white-space:nowrap}
+/* phones: the chat column is narrow, so drop the avatar and tighten the chips */
+@media (max-width:480px){
+  .g9-avatar{display:none}
+  .quick-replies{gap:6px}
+  .qr-btn.g9-has-ic{gap:4px;padding:8px 7px}
+  .g9-chip-ic{width:16px;height:16px}
+}
+
+/* UI consistency (Oct 2026) */
+/* every slide is the standard glass card, inset, with ~46px inner padding; content centred vertically
+   (the layer skips the card on slides that hold a .chat-card, so the game draws it here) */
+html.saa-skin .slide.active{
+  flex:1 1 auto !important;min-height:0 !important;width:100%;box-sizing:border-box;
+  border-radius:20px;background:rgba(255,255,255,.035) !important;border:1px solid rgba(255,255,255,.10) !important;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  padding:calc(clamp(18px,3.4vh,40px) / var(--zz,1)) calc(clamp(28px,3.6vw,56px) / var(--zz,1)) !important;
+  display:flex !important;flex-direction:column !important;justify-content:flex-start !important;gap:0 !important;
+}
+/* centred with auto margins (safe: tall content is never pushed above the card top, and the layer's fit sees it) */
+html.saa-skin .slide.active > .saa-inner.saa-split,
+html.saa-skin .slide.active > .intro.saa-split{width:100%;margin-top:auto !important;margin-bottom:auto !important;align-items:center !important;align-content:center !important}
+/* drills / welcome: left column text, right column chat, both centred */
+html.saa-skin #slide-chat .saa-work,html.saa-skin #slide-recap .saa-work{justify-content:center}
+/* recap: hide the results box until it has content (static views show it empty) */
+#slide-recap .chat-card:has(> #recap-window:empty){display:none}
+/* amber is only the footer's main button: in-card Start and Download are blue */
+.qr-btn.primary,.btn-download{
+  background:var(--blue) !important;color:#fff !important;border:1px solid var(--blue) !important;box-shadow:0 8px 22px rgba(91,118,255,.28) !important;
+}
+.qr-btn.primary:hover,.btn-download:hover{background:#6C85FF !important;color:#fff !important;filter:none}
+@media (max-width:700px){
+  /* phones: the card grows with its content and the area between header and footer scrolls (layer's scroll zone);
+     one column (the layer's .saa-inner.saa-split grid rule outranks its own phone block rule) */
+  html.saa-skin .slide.active{flex:0 0 auto !important;min-height:100% !important;height:auto !important;overflow:visible !important;
+    padding:18px 16px !important;justify-content:flex-start !important;border-radius:16px}
+  html.saa-skin .slide.active > .saa-inner.saa-split,html.saa-skin .slide.active > .intro.saa-split{display:block !important}
+  html.saa-skin .slide.active .saa-split > .saa-work{margin-top:14px}
+}
+/* fit inside the card: wider chat column, tighter chat rhythm on short screens */
+@media (min-width:701px){ html.saa-skin #slide-chat .saa-split{grid-template-columns:minmax(0,4fr) minmax(0,6fr)} }
+@media (max-height:760px) and (min-width:701px){
+  html.saa-skin .slide.active{padding-top:calc(16px / var(--zz,1)) !important;padding-bottom:calc(16px / var(--zz,1)) !important}
+  html.saa-skin .slide.active .chat-card{padding:12px 16px}
+  html.saa-skin .slide.active :is(.chat-window,.turn){gap:7px}
+  html.saa-skin .slide.active .bubble{padding:8px 13px;line-height:1.5}
+  html.saa-skin #slide-recap .recap-card{padding:8px 10px}
+  html.saa-skin #slide-recap .recap-list li{padding:5px 10px}
+  html.saa-skin #slide-recap .saa-work{gap:8px}
+}
+@media (min-width:701px){
+  html.saa-skin #slide-recap .chat-card{padding:12px 16px}
+  html.saa-skin #slide-recap :is(.chat-window,.turn){gap:7px}
+  html.saa-skin #slide-recap .bubble{padding:8px 13px;line-height:1.5}
+  html.saa-skin #slide-recap .recap-card{padding:8px 10px}
+  html.saa-skin #slide-recap .recap-list li{padding:5px 10px}
+  html.saa-skin #slide-recap .saa-work{gap:8px}
+}
+
+/* QA fixes (Oct 2026) */
+.qr-btn.tried,.qr-btn.tried:hover{opacity:.45;text-decoration:line-through;cursor:not-allowed;background:transparent}
+.dl-msg{margin:8px 0 0;min-height:1em;color:var(--amber, #F5B544);font-weight:600}
+.dl-msg:empty{display:none}
+@media (max-width: 760px), (pointer: coarse){
+  .meta-btn{min-height:44px;padding:10px 4px}
+  .qr-btn{min-height:44px}
+}

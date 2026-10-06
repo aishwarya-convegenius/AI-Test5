@@ -8,23 +8,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="saa-upgrade.css">
+<link rel="stylesheet" href="saa-kit.css">
 </head>
 <body>
 <div class="app">
 
   <header class="saa-header">
     <div class="saa-brand">
-      <img src="assets/logo-mark.png" alt="">
+      <img src="assets/logo-mark.webp" alt="">
       <span>SWIFT&nbsp;AI&nbsp;ACADEMY</span>
-    </div>
-    <div class="saa-header-actions">
-      <button type="button" class="saa-icon-btn hide-phone" aria-label="Course outline">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
-      </button>
-      <button type="button" class="saa-ghost-pill" aria-label="Close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        Close
-      </button>
     </div>
   </header>
 
@@ -35,8 +28,9 @@
       <div class="intro">
         <div class="saa-eyebrow">Practice Bot &middot; 0.5 hrs &middot; Practical</div>
         <h1>Practice Bot &middot; Framing and Refining</h1>
-        <p class="subtitle">Short drills. Quick feedback. Two tries before I help.</p>
+        <p class="subtitle">You do 5 short drills and get feedback at once. You get 2 tries before the bot helps you.</p>
         <span class="schema">AAI-E-MC1-S02-BOT01</span>
+        <figure class="g9-flow"><img src="assets/diag-five-drills.webp" width="560" height="200" alt="Five drills, numbered 1 to 5. In each drill you get Try 1, then Try 2, then the practice bot helps you."></figure>
       </div>
     </section>
 
@@ -44,7 +38,9 @@
     <section class="slide" id="slide-chat">
       <div class="slide-head">
         <div class="saa-eyebrow" id="chat-eyebrow">Practice Bot</div>
-        <h2 id="chat-title">Meet your practice bot</h2>
+        <h2 id="chat-title">Meet your practice bot for this lesson.</h2>
+        <p class="chat-body" id="chat-body">You practise two skills. You frame a clear request, and you refine an AI answer.</p>
+        <p class="do" id="chat-task"><b>Your task.</b> <span id="chat-task-text">Tap Start to begin the first drill.</span></p>
       </div>
       <div class="chat-card">
         <div class="chat-window" id="chat-window"></div>
@@ -55,10 +51,20 @@
     <section class="slide" id="slide-recap">
       <div class="slide-head">
         <div class="saa-eyebrow">Practice complete</div>
-        <h2>Your recap</h2>
+        <h2>Here is how you did in the 5 drills.</h2>
+        <p>Mastered means you were right on your first try. Needs review means you should practise that drill again.</p>
+        <p class="do"><b>Your task.</b> Look at your results, then answer the question.</p>
       </div>
       <div class="chat-card">
         <div class="chat-window" id="recap-window"></div>
+      </div>
+      <div class="saa-kit" data-kit="quick" data-required>
+        <p class="saa-q">Which four parts make a clear request to an AI tool?</p>
+        <div class="saa-k-opts">
+          <button class="saa-k-opt" type="button" data-ok data-why="Yes. A clear request has a role, context, a task and a format.">Role, Context, Task and Format</button>
+          <button class="saa-k-opt" type="button" data-why="Not quite. These are moves that fix an answer after you get it.">Narrow, Expand, Check it and Combine</button>
+        </div>
+        <p class="saa-k-why"></p>
       </div>
     </section>
 
@@ -66,16 +72,26 @@
     <section class="slide" id="slide-wrap">
       <div class="slide-head">
         <div class="saa-eyebrow">Practice complete</div>
-        <h2>Before you go</h2>
+        <h2>Keep real details out of AI tools.</h2>
+        <div class="stop-rule">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+          <div><span class="label">Reminder</span><p>Never type real names, marks, phone numbers or ID numbers into an AI tool. Use made-up details when you practise.</p></div>
+        </div>
+        <p class="do"><b>Your task.</b> Stamp each detail, then download your results.</p>
       </div>
-      <div class="stop-rule">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-        <div><span class="label">Reminder</span><p>Never type real names, marks, phone numbers or ID numbers into an AI tool. Use made-up details for practice.</p></div>
+      <div class="saa-kit" data-kit="stamp" data-required data-stamps="Do not type|Safe to use">
+        <div class="saa-rows">
+          <div class="saa-row" data-ans="0" data-why="Yes. A real phone number is private, so keep it out." data-hint="Not quite. Is this a real detail about a real person?"><img class="g9-row-ic" src="assets/icons/icon-private-phone.webp" alt="" aria-hidden="true">Your friend's real phone number</div>
+          <div class="saa-row" data-ans="1" data-why="Yes. A made-up name is safe for practice." data-hint="Not quite. Is this name real or made up?"><img class="g9-row-ic" src="assets/icons/icon-madeup-name.webp" alt="" aria-hidden="true">A made-up name like Student A</div>
+          <div class="saa-row" data-ans="0" data-why="Yes. Real marks are private, so keep them out." data-hint="Not quite. Are these marks real?"><img class="g9-row-ic" src="assets/icons/icon-private-marks.webp" alt="" aria-hidden="true">Your real marks from the last test</div>
+          <div class="saa-row" data-ans="0" data-why="Yes. An ID number is private, so never type it." data-hint="Not quite. Does this number belong to a real person?"><img class="g9-row-ic" src="assets/icons/icon-private-id.webp" alt="" aria-hidden="true">Your trainee ID number</div>
+        </div>
       </div>
       <div class="end-actions">
         <button type="button" class="btn-download" id="download-btn">Download my results</button>
         <button type="button" class="btn-restart" id="restart-btn">Start over</button>
       </div>
+      <p class="dl-msg" id="download-msg" aria-live="polite"></p>
     </section>
 
   </main>
@@ -97,5 +113,7 @@
 
 </div>
 <script src="script.js"></script>
+<script src="saa-upgrade.js"></script>
+<script src="saa-kit.js"></script>
 </body>
 </html>

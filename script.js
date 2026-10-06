@@ -10,66 +10,66 @@ var CLUSTERS = [
     id: 'C1_DIAGNOSE_CONTEXT',
     lane: 'ITI',
     type: 'diagnose',
-    scenario: 'You are a workshop instructor. Write a safety reminder. Format it as 3 points for the noticeboard.',
-    question: "What's missing from this request?",
+    scenario: 'You are a workshop instructor. Write a safety reminder. Format it as 3 points for the notice board.',
+    question: 'What is missing from this request?',
     options: ['Context', 'Role', 'Task', 'Format'],
     correctIndex: 0,
-    correctFeedback: 'Correct — it never says who this is for, or why. Always add the context.',
-    nudge: "Not quite. Look again — does it say who this is for, and why they need it?",
-    reveal: "The missing part was Context. It doesn't say who this is for or why.",
-    help: "Hint: read it out loud. Does it say who it's for, who's speaking, what to make, and how it should look?"
+    correctFeedback: 'Yes. The request does not say who it is for, or why they need it. Always add the context.',
+    nudge: 'Not quite. Read it again. Check each part: who speaks, who it is for, what to make and how it should look.',
+    reveal: 'The missing part was Context. The request does not say who it is for, or why.',
+    help: 'Hint. Read the request out loud. Does it say who it is for, who speaks, what to make and how it should look?'
   },
   {
     id: 'C2_DIAGNOSE_ROLE',
     lane: 'Campus',
     type: 'diagnose',
-    scenario: "For the group's project due Friday (practice date), write a reminder message. Format it as one short message.",
-    question: "What's missing from this request?",
+    scenario: 'Our group project is due on Friday, which is a practice date. Write a reminder message about it. Format it as one short message.',
+    question: 'What is missing from this request?',
     options: ['Context', 'Role', 'Task', 'Format'],
     correctIndex: 1,
-    correctFeedback: 'Correct — it never says who the AI should act as.',
-    nudge: 'Not quite. Look again — does it say who the AI should act as?',
-    reveal: "The missing part was Role. It doesn't say who the AI should act as.",
-    help: "Hint: read it out loud. Does it say who it's for, who's speaking, what to make, and how it should look?"
+    correctFeedback: 'Yes. The request does not say who the AI should act as.',
+    nudge: 'Not quite. Read it again. Check each part: who speaks, who it is for, what to make and how it should look.',
+    reveal: 'The missing part was Role. The request does not say who the AI should act as.',
+    help: 'Hint. Read the request out loud. Does it say who it is for, who speaks, what to make and how it should look?'
   },
   {
     id: 'C3_MOVE_NARROW',
     lane: 'ITI',
     type: 'move',
-    scenario: 'A trainee asked AI for a safety reminder. The answer covered lathe safety, drill safety and fire safety — much more than needed.',
-    question: 'Which move fixes this?',
+    scenario: 'A trainee asked an AI tool for a safety reminder. The answer covered lathe safety, drill safety and fire safety. This was much more than the trainee needed.',
+    question: 'Which move fixes this answer?',
     options: ['Narrow', 'Expand', 'Change register', 'Check it', 'Combine'],
     correctIndex: 0,
-    correctFeedback: 'Correct — say "Only tell me about ___" to narrow it down.',
-    nudge: 'Not quite. Think about it: is the answer too long, too short, the wrong tone, unverified, or from two drafts?',
-    reveal: 'The right move was Narrow. The answer covered too much — ask for just one part.',
-    help: 'Hint: is the answer too long, too short, the wrong tone, unsure of itself, or does it need the best of two drafts?'
+    correctFeedback: 'Yes. The answer covers too much. Say "Only tell me about ___" to narrow it.',
+    nudge: 'Not quite. Look at the problem again. Is the answer too long, too short, in the wrong tone, not checked, or in two drafts?',
+    reveal: 'The right move was Narrow. The answer covered too much, so ask for just one part.',
+    help: 'Hint. Is the answer too long or too short? Is the tone wrong, is it unsure, or do you need the best of two drafts?'
   },
   {
     id: 'C4_MOVE_REGISTER',
     lane: 'Campus',
     type: 'move',
-    scenario: 'A class representative asked AI to write a submission reminder. The answer used difficult words that first-year students may not understand.',
-    question: 'Which move fixes this?',
+    scenario: 'A class representative asked an AI tool to write a submission reminder. The answer used difficult words. First-year students may not understand them.',
+    question: 'Which move fixes this answer?',
     options: ['Narrow', 'Expand', 'Change register', 'Check it', 'Combine'],
     correctIndex: 2,
-    correctFeedback: 'Correct — say "Say this simply for ___" to change the tone.',
-    nudge: 'Not quite. Think about it: is the answer too long, too short, the wrong tone, unverified, or from two drafts?',
-    reveal: 'The right move was Change register. The words were too hard for the audience.',
-    help: 'Hint: is the answer too long, too short, the wrong tone, unsure of itself, or does it need the best of two drafts?'
+    correctFeedback: 'Yes. The words are too hard for the readers. Say "Say this simply for ___" to change the tone.',
+    nudge: 'Not quite. Look at the problem again. Is the answer too long, too short, in the wrong tone, not checked, or in two drafts?',
+    reveal: 'The right move was Change register. The words were too hard for the readers.',
+    help: 'Hint. Is the answer too long or too short? Is the tone wrong, is it unsure, or do you need the best of two drafts?'
   },
   {
     id: 'C5_MOVE_CHECK',
     lane: 'ITI',
     type: 'move',
-    scenario: 'AI wrote a safety notice that included "Fine: ₹500 for non-compliance" — but nobody asked for a fine amount.',
-    question: 'Which move fixes this?',
+    scenario: 'An AI tool wrote a safety notice with the line "Fine: ₹500 for non-compliance". Nobody asked for a fine amount.',
+    question: 'Which move fixes this answer?',
     options: ['Narrow', 'Expand', 'Change register', 'Check it', 'Combine'],
     correctIndex: 3,
-    correctFeedback: 'Correct — always ask "What might be wrong here?" AI should not invent rules, fines or dates you did not give it.',
-    nudge: 'Not quite. Think about it: is the answer too long, too short, the wrong tone, unverified, or from two drafts?',
-    reveal: "The right move was Check it. AI should never invent a fine, rule or date you didn't give it.",
-    help: 'Hint: is the answer too long, too short, the wrong tone, unsure of itself, or does it need the best of two drafts?'
+    correctFeedback: 'Yes. Always ask "What might be wrong here?" AI should not invent rules, fines or dates that you did not give it.',
+    nudge: 'Not quite. Look at the problem again. Is the answer too long, too short, in the wrong tone, not checked, or in two drafts?',
+    reveal: 'The right move was Check it. AI should never invent a fine, rule or date that you did not give it.',
+    help: 'Hint. Is the answer too long or too short? Is the tone wrong, is it unsure, or do you need the best of two drafts?'
   }
 ];
 
@@ -94,6 +94,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var recapWindow = document.getElementById('recap-window');
   var chatTitle = document.getElementById('chat-title');
   var chatEyebrow = document.getElementById('chat-eyebrow');
+  var chatBody = document.getElementById('chat-body');
+  var chatTask = document.getElementById('chat-task-text');
   var backBtn = document.getElementById('back-btn');
   var nextBtn = document.getElementById('next-btn');
   var nextLabel = document.getElementById('next-label');
@@ -155,9 +157,32 @@ document.addEventListener('DOMContentLoaded', function () {
     hintSlot = null;
   }
 
+  // Game 9 designer assets (Oct 2026): bot avatar, chip icons, result icons.
+  var CHIP_ICONS = {
+    'Role': 'icon-role', 'Context': 'icon-context', 'Task': 'icon-task', 'Format': 'icon-format',
+    'Narrow': 'icon-move-1', 'Expand': 'icon-move-2', 'Change register': 'icon-move-3',
+    'Check it': 'icon-move-4', 'Combine': 'icon-move-5'
+  };
+  function iconImg(name, cls) {
+    var im = document.createElement('img');
+    im.className = cls;
+    im.src = 'assets/icons/' + name + '.webp';
+    im.alt = '';
+    im.setAttribute('aria-hidden', 'true');
+    return im;
+  }
+  function botAvatar() {
+    var im = document.createElement('img');
+    im.className = 'g9-avatar';
+    im.src = 'assets/logo-swiftchat-64.webp';
+    im.alt = 'Practice bot';
+    return im;
+  }
+
   function addRow(side, bubbleEl) {
     var row = document.createElement('div');
     row.className = 'msg-row ' + side;
+    if (side === 'bot') row.appendChild(botAvatar());
     row.appendChild(bubbleEl);
     target.appendChild(row);
     return row;
@@ -200,10 +225,10 @@ document.addEventListener('DOMContentLoaded', function () {
     b.className = 'bubble reveal';
     var label = document.createElement('span');
     label.className = 'reveal-label';
-    label.textContent = "Here's the answer";
+    label.textContent = 'Here is the answer';
     b.appendChild(label);
     b.appendChild(document.createTextNode(text));
-    log('Bot', "Here's the answer: " + text);
+    log('Bot', 'Here is the answer: ' + text);
     return addRow('bot', b);
   }
 
@@ -224,6 +249,10 @@ document.addEventListener('DOMContentLoaded', function () {
       btn.type = 'button';
       btn.className = 'qr-btn' + (opt.primary ? ' primary' : '');
       btn.textContent = opt.label;
+      if (CHIP_ICONS[opt.label]) {
+        btn.classList.add('g9-has-ic');
+        btn.insertBefore(iconImg(CHIP_ICONS[opt.label], 'g9-chip-ic'), btn.firstChild);
+      }
       btn.addEventListener('click', function () {
         clearControls();
         onPick(opt.label);
@@ -250,11 +279,14 @@ document.addEventListener('DOMContentLoaded', function () {
         b.className = 'bubble bot hint';
         hintSlot = document.createElement('div');
         hintSlot.className = 'msg-row bot';
+        hintSlot.appendChild(botAvatar());
         hintSlot.appendChild(b);
         target.insertBefore(hintSlot, activeControls);
       }
-      hintSlot.firstChild.textContent = cluster.help;
-      log('Bot', cluster.help);
+      if (hintSlot.lastChild.textContent !== cluster.help) {
+        hintSlot.lastChild.textContent = cluster.help;
+        log('Bot', cluster.help);
+      }
     });
     row.appendChild(helpBtn);
 
@@ -273,12 +305,21 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function askQuestion(cluster) {
-    addQuickReplies(
+    var wrap = addQuickReplies(
       cluster.options.map(function (o) { return { label: o }; }),
       function (label) { handleAnswer(cluster, label); }
     );
+    // A wrong answer already tried cannot be picked again.
+    Array.prototype.forEach.call(wrap.querySelectorAll('.qr-btn'), function (b) {
+      if (state.chosen.indexOf(b.textContent.trim()) !== -1) {
+        b.disabled = true;
+        b.classList.add('tried');
+        b.setAttribute('aria-label', b.textContent.trim() + ' (already tried)');
+      }
+    });
     addMetaActions(cluster);
   }
+  function sfx(ok) { if (window.SAA_SFX) { if (ok) { SAA_SFX.correct(); } else { SAA_SFX.wrong(); } } }
 
   function handleAnswer(cluster, label) {
     state.attempts++;
@@ -289,16 +330,19 @@ document.addEventListener('DOMContentLoaded', function () {
     addPrevReply(label);
 
     if (label === correctLabel) {
+      sfx(true);
       addCorrectBubble(cluster.correctFeedback);
       recordResult(cluster, state.attempts === 1 ? 'mastered' : 'reviewed');
       resolveDrill();
     } else if (state.attempts >= 2) {
-      addIncorrectBubble(cluster.nudge);
+      sfx(false);
+      addIncorrectBubble('Not quite. That was your second try, so here is the answer.');
       addReveal(cluster.reveal);
       recordResult(cluster, 'reviewed');
       resolveDrill();
     } else {
       // Second try: nudge, the same request again (it was on screen before), and the options.
+      sfx(false);
       addIncorrectBubble(cluster.nudge);
       if (cluster.scenario) addScenario(cluster.scenario);
       askQuestion(cluster);
@@ -307,9 +351,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function startSkip(cluster) {
     newTurn(state.view);
-    addBot('No problem — why are you skipping?');
+    addBot('No problem. Why do you want to skip this one?');
     addQuickReplies(
-      [{ label: 'Not sure' }, { label: 'Short on time' }, { label: 'Prefer to move on' }],
+      [{ label: 'I am not sure.' }, { label: 'I do not have time.' }, { label: 'I want to move on.' }],
       function (label) {
         newTurn(state.view);
         addPrevReply(label);
@@ -361,9 +405,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function finish() {
     recapWindow.innerHTML = '';
     target = recapWindow;
-    addBot("Nice work! You've completed all 5 drills.");
     var masteredCount = state.results.filter(function (r) { return r.outcome === 'mastered'; }).length;
-    addBot(masteredCount + ' of ' + CLUSTERS.length + ' correct on your first try.');
+    addBot(masteredCount >= 4 ? 'Nice work! You have finished all 5 drills.'
+      : masteredCount >= 2 ? 'Good effort. You have finished all 5 drills.'
+      : 'You have finished all 5 drills. Practise the ones that need review.');
+    addBot('You got ' + masteredCount + ' of ' + CLUSTERS.length + ' right on your first try.');
 
     var card = document.createElement('div');
     card.className = 'recap-card';
@@ -372,12 +418,15 @@ document.addEventListener('DOMContentLoaded', function () {
     state.results.forEach(function (r, idx) {
       var li = document.createElement('li');
       var left = document.createElement('span');
-      left.textContent = 'Drill ' + (idx + 1) + ' (' + r.lane + ')';
+      left.textContent = 'Drill ' + (idx + 1) + ' · ' + r.lane;
       var right = document.createElement('span');
       right.className = 'recap-outcome ' + r.outcome;
       right.textContent = r.outcome === 'mastered' ? 'Mastered'
         : r.outcome === 'reviewed' ? 'Needs review'
         : 'Skipped';
+      if (r.outcome !== 'skipped') {
+        right.insertBefore(iconImg(r.outcome === 'mastered' ? 'icon-mastered' : 'icon-needs-review', 'g9-res-ic'), right.firstChild);
+      }
       li.appendChild(left);
       li.appendChild(right);
       list.appendChild(li);
@@ -390,16 +439,42 @@ document.addEventListener('DOMContentLoaded', function () {
     render();
   }
 
+  function outcomeLabel(o) { return o === 'mastered' ? 'Mastered' : o === 'reviewed' ? 'Needs review' : 'Skipped'; }
   function downloadResults() {
+    var stampKit = sections.wrap.querySelector('.saa-kit[data-kit="stamp"]');
+    var dlMsg = document.getElementById('download-msg');
+    if (stampKit && !stampKit.classList.contains('is-done')) {
+      if (dlMsg) { dlMsg.textContent = 'Stamp each detail first. Then you can download your results.'; }
+      Array.prototype.forEach.call(stampKit.querySelectorAll('.saa-row:not(.done)'), function (x) { x.classList.add('saa-nudge'); });
+      setTimeout(function () { Array.prototype.forEach.call(stampKit.querySelectorAll('.saa-nudge'), function (x) { x.classList.remove('saa-nudge'); }); }, 2600);
+      return;
+    }
+    if (dlMsg) { dlMsg.textContent = ''; }
     var lines = ['Practice Bot — Framing and Refining — my results', ''];
     state.results.forEach(function (r, idx) {
       lines.push('Drill ' + (idx + 1) + ' (' + r.lane + ')');
       if (r.scenario) lines.push('Scenario: ' + r.scenario);
       lines.push('Question: ' + r.question);
       lines.push('My answer(s): ' + (r.chosen.length ? r.chosen.join(' then ') : '(skipped)'));
-      lines.push('Outcome: ' + r.outcome + (r.skipReason ? ' (' + r.skipReason + ')' : ''));
+      lines.push('Outcome: ' + outcomeLabel(r.outcome) + (r.skipReason ? ' (' + r.skipReason + ')' : ''));
       lines.push('');
     });
+    var quickKit = sections.recap.querySelector('.saa-kit[data-kit="quick"]');
+    if (quickKit) {
+      var q = quickKit.querySelector('.saa-q');
+      var tries = Array.prototype.filter.call(quickKit.querySelectorAll('.saa-k-opt'), function (o) { return o.classList.contains('wrong') || o.classList.contains('right'); });
+      lines.push('Recap question: ' + (q ? q.textContent.trim() : ''));
+      lines.push('My answer(s): ' + (tries.length ? tries.map(function (o) { return o.textContent.trim() + (o.classList.contains('right') ? ' (right)' : ' (not right)'); }).join(' then ') : '(not answered)'));
+      lines.push('');
+    }
+    if (stampKit) {
+      lines.push('Keep real details out of AI tools');
+      Array.prototype.forEach.call(stampKit.querySelectorAll('.saa-row'), function (row) {
+        var names = (stampKit.getAttribute('data-stamps') || 'Do not type|Safe to use').split('|');
+        lines.push('- ' + row.textContent.trim() + ': ' + (names[+row.getAttribute('data-ans')] || ''));
+      });
+      lines.push('');
+    }
     lines.push('Full conversation', '');
     state.transcript.forEach(function (m) { lines.push(m.who + ': ' + m.text); });
     var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
@@ -415,8 +490,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function welcome() {
     newTurn(SLIDE_WELCOME);
-    addBot("Hi! I'm your practice bot for Framing and Refining.");
-    addBot("I'll show you short requests. You tell me what's wrong, or which move fixes it. You get 2 tries before I help.");
+    addBot('Hi! I am your practice bot for Framing and Refining.');
+    addBot('I show you a short request or an AI answer. You tell me what is wrong, or which move fixes it.');
+    addBot('You get 2 tries before I help.');
     addQuickReplies([{ label: 'Start', primary: true }], begin);
   }
 
@@ -429,6 +505,8 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function restart() {
+    // A clean start: the kits (recap quiz, stamps) are reset by reloading the page.
+    try { window.location.reload(); return; } catch (e) {}
     chatWindow.innerHTML = '';
     recapWindow.innerHTML = '';
     turns = {};
@@ -469,8 +547,14 @@ document.addEventListener('DOMContentLoaded', function () {
     render();
   }
 
+  var lastView = -1;
   function render() {
     var v = state.view;
+    if (v !== lastView) {
+      lastView = v;
+      var zones = document.querySelectorAll('.saa-scrollzone, #stage');
+      Array.prototype.forEach.call(zones, function (z) { z.scrollTop = 0; });
+    }
     sections.intro.classList.toggle('active', v === SLIDE_INTRO);
     sections.chat.classList.toggle('active', v === SLIDE_WELCOME || isDrill(v));
     sections.recap.classList.toggle('active', v === SLIDE_RECAP);
@@ -480,11 +564,22 @@ document.addEventListener('DOMContentLoaded', function () {
       Object.keys(turns).forEach(function (k) { turns[k].hidden = (+k !== v); });
       if (v === SLIDE_WELCOME) {
         chatEyebrow.textContent = 'Practice Bot';
-        chatTitle.textContent = 'Meet your practice bot';
+        chatTitle.textContent = 'Meet your practice bot for this lesson.';
+        chatBody.textContent = 'You practise two skills. You frame a clear request, and you refine an AI answer.';
+        chatTask.textContent = state.started ? 'Tap Next to go to your drills.' : 'Tap Start to begin the first drill.';
       } else {
         var i = v - SLIDE_FIRST_DRILL;
-        chatEyebrow.textContent = 'Practice Bot · ' + CLUSTERS[i].lane;
-        chatTitle.textContent = 'Drill ' + (i + 1) + ' of ' + CLUSTERS.length;
+        var c = CLUSTERS[i];
+        var done = v < state.live || state.resolved;
+        chatEyebrow.textContent = 'Drill ' + (i + 1) + ' of ' + CLUSTERS.length + ' · ' + c.lane;
+        if (c.type === 'diagnose') {
+          chatTitle.textContent = 'Find the part that is missing from the request.';
+          chatTask.textContent = done ? 'Read the feedback, then tap Next.' : 'Tap the part that is missing.';
+        } else {
+          chatTitle.textContent = 'Choose the move that fixes the AI answer.';
+          chatTask.textContent = done ? 'Read the feedback, then tap Next.' : 'Tap the move that fixes the answer.';
+        }
+        chatBody.textContent = 'You get 2 tries. Tap Need a hint if you are stuck.';
       }
     }
 
@@ -498,9 +593,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var can = canGoNext();
     nextBtn.disabled = !can;
     nextLabel.textContent = (v === SLIDE_WELCOME && !state.started) ? 'Start' : 'Next';
-    // One amber per slide: go quiet when the chat owns the primary (Start chip) or Next can't be used.
-    var quiet = !can || (v === SLIDE_WELCOME && !state.started) || v === SLIDE_WRAP;
-    nextBtn.classList.toggle('is-quiet', quiet);
+    // UI consistency (Oct 2026): the footer main button is always the one amber (in-card Start/Download are blue);
+    // when Next is locked it is only dimmed.
+    nextBtn.classList.remove('is-quiet');
   }
 
   backBtn.addEventListener('click', goBack);

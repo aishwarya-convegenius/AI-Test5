@@ -1,0 +1,308 @@
+/* ==========================================================================
+   Swift AI Academy - interaction kit (adapted from the Interaction Library)
+   reveal (tap / scratch) · quick check · sort (+ data-style="deck": one card at a time) · order (domino) · spot · stamp
+   · match (band or wire from item to partner; data-mode="pick" = one plug wired to the chosen option)
+   · dial (a knob with 2-4 labelled positions; a sample AI answer in a chat card swaps as it turns)
+   Dark-frame styling; one look for every option; tap AND drag; reduced motion respected.
+   ========================================================================== */
+.saa-kit { --k-ink:#F6F4EF; --k-dim:#AEB6D4; --k-blue:#5B76FF; --k-blue-t:rgba(91,118,255,.16); --k-line:rgba(255,255,255,.24);
+  --k-ok:#4FE0A8; --k-ok-t:rgba(79,224,168,.16); --k-bad:#FF8A8A; --k-bad-t:rgba(255,138,138,.14);
+  display:flex; flex-direction:column; gap:clamp(8px,1.4vh,12px); width:100%; color:var(--k-ink); font-family:inherit; text-align:left; }
+.saa-kit button { font:inherit; color:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.saa-kit :focus-visible { outline:2px solid #FFC168; outline-offset:3px; }
+.saa-kit .saa-k-opt, .saa-kit .saa-card, .saa-kit .saa-chip, .saa-kit .saa-steps > li, .saa-kit .saa-row, .saa-kit .saa-stamp-btn {
+  border:1.5px solid var(--k-line); background:rgba(255,255,255,.07); border-radius:14px; box-shadow:0 3px 0 rgba(0,0,0,.28);
+  transition:transform .12s, border-color .12s, background .12s, box-shadow .12s; }
+.saa-kit .saa-k-opt:hover, .saa-kit .saa-card:hover, .saa-kit .saa-chip:hover, .saa-kit .saa-steps > li:hover { border-color:var(--k-blue); transform:translateY(-1px); }
+.saa-kit .saa-k-status { font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8FA0FF; margin:0; }
+.saa-kit .saa-k-why { margin:0; min-height:1.4em; font-weight:600; line-height:1.45; }
+.saa-kit .saa-k-why.ok { color:var(--k-ok); } .saa-kit .saa-k-why.bad { color:var(--k-bad); }
+.saa-kit .saa-k-check { align-self:flex-start; padding:11px 22px; border-radius:999px; border:0; background:var(--k-blue); color:#fff !important; font-weight:700; box-shadow:0 3px 0 rgba(0,0,0,.3); }
+.saa-kit .saa-k-check:disabled { opacity:.45; cursor:not-allowed; }
+@keyframes saaShake { 0%,100%{transform:none} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+@keyframes saaPop { 0%{transform:scale(.9);opacity:0} 70%{transform:scale(1.04)} 100%{transform:none;opacity:1} }
+.saa-kit .saa-shake { animation:saaShake .35s; }
+.saa-kit.is-done { }
+
+/* ---- reveal: flip cards ---- */
+.saa-kit .saa-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap:clamp(8px,1.4vh,12px); }
+.saa-kit .saa-card { position:relative; min-height:clamp(84px,14vh,130px); padding:0; perspective:900px; background:transparent; border:0; box-shadow:none; }
+.saa-kit .saa-card-in { position:absolute; inset:0; transition:transform .5s; transform-style:preserve-3d; }
+.saa-kit .saa-card.open .saa-card-in { transform:rotateY(180deg); }
+.saa-kit .saa-front, .saa-kit .saa-back { position:absolute; inset:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:6px; padding:12px 16px; border-radius:14px;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden; border:1.5px solid var(--k-line); box-shadow:0 3px 0 rgba(0,0,0,.28); }
+.saa-kit .saa-front { background:rgba(255,255,255,.07); font-weight:700; font-size:clamp(14px,2.2vh,19px); }
+.saa-kit .saa-front::after { content:"Tap to open"; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8FA0FF; }
+.saa-kit .saa-back { text-align:left; background:var(--k-blue-t); border-color:var(--k-blue); transform:rotateY(180deg); font-weight:600; font-size:clamp(13px,2vh,17px); line-height:1.4; }
+.saa-kit .saa-card canvas { position:absolute; inset:0; width:100%; height:100%; border-radius:14px; z-index:2; touch-action:none; transition:opacity .4s; }
+.saa-kit .saa-card.scratch .saa-front::after { content:"Scratch or tap"; }
+.saa-kit .saa-card.scratch.open canvas { opacity:0; pointer-events:none; }
+.saa-kit .saa-card.scratch .saa-card-in { transform:none !important; }
+.saa-kit .saa-card.scratch .saa-back { transform:none; }
+.saa-kit .saa-card.scratch .saa-front { display:none; }
+
+/* ---- quick check ---- */
+.saa-kit .saa-q { margin:0; font-size:clamp(16px,2.6vh,22px); font-weight:700; line-height:1.3; }
+.saa-kit .saa-k-opts { display:grid; gap:clamp(8px,1.4vh,12px); }
+.saa-kit .saa-k-opt { display:flex; align-items:center; gap:12px; min-height:clamp(46px,7vh,60px); padding:8px 16px; text-align:left; font-weight:600; font-size:clamp(14px,2.1vh,18px); }
+.saa-kit .saa-k-opt::before { content:""; flex:0 0 22px; height:22px; border-radius:50%; border:2px solid rgba(255,255,255,.5); }
+.saa-kit .saa-k-opt.right { border-color:var(--k-ok); background:var(--k-ok-t); } .saa-kit .saa-k-opt.right::before { background:var(--k-ok); border-color:var(--k-ok); }
+.saa-kit .saa-k-opt.wrong { border-color:var(--k-bad); background:var(--k-bad-t); opacity:.75; } .saa-kit .saa-k-opt.wrong::before { border-color:var(--k-bad); }
+
+/* ---- sort ---- */
+.saa-kit .saa-bins { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; }
+.saa-kit .saa-bin { min-height:clamp(84px,15vh,150px); padding:12px; border-radius:16px; border:1.5px dashed rgba(143,160,255,.6); background:rgba(255,255,255,.04); display:flex; flex-direction:column; gap:6px; transition:background .12s, border-color .12s; }
+.saa-kit .saa-bin-h { font-weight:700; font-size:clamp(14px,2.2vh,18px); margin:0 0 4px; }
+.saa-kit .saa-bin.over, .saa-kit.armed .saa-bin { border-color:#8FA0FF; background:rgba(91,118,255,.12); }
+.saa-kit .saa-pool { display:flex; flex-wrap:wrap; gap:8px; min-height:46px; }
+.saa-kit .saa-chip { min-height:44px; padding:8px 14px; font-weight:600; font-size:clamp(13px,2vh,16px); touch-action:none; text-align:left; }
+.saa-kit .saa-chip[aria-pressed="true"] { border-color:var(--k-blue); background:var(--k-blue-t); }
+.saa-kit .saa-bin .saa-chip { background:var(--k-ok-t); border-color:var(--k-ok); pointer-events:none; animation:saaPop .3s both; box-shadow:none; }
+.saa-ghost-chip { position:fixed; left:0; top:0; z-index:9998; pointer-events:none; margin:0; border-radius:14px; padding:8px 14px; font-weight:700; color:#fff; background:rgba(60,89,246,.6); border:1.5px solid #8FA0FF; box-shadow:0 16px 36px rgba(0,0,0,.5); }
+
+/* ---- sort, data-style="deck": one large card at a time above the boxes (Flick to Sort) ---- */
+.saa-kit.saa-deck .saa-pool { display:grid; flex-wrap:nowrap; gap:0; min-height:clamp(104px,18vh,160px); padding-bottom:10px; position:relative; }
+.saa-kit.saa-deck .saa-pool > .saa-chip, .saa-kit.saa-deck .saa-deck-ghost {
+  grid-area:1/1; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(6px,1.2vh,12px);
+  min-height:clamp(104px,18vh,160px); width:100%; margin:0; padding:clamp(12px,2.2vh,22px) 20px; border-radius:18px; text-align:center;
+  font-size:clamp(17px,2.9vh,25px); font-weight:700; line-height:1.25; color:var(--k-ink);
+  background:linear-gradient(160deg, #33449A, #212E6E); border:1.5px solid rgba(143,160,255,.75); box-shadow:0 10px 26px rgba(0,0,0,.35), 0 3px 0 rgba(0,0,0,.28);
+  touch-action:pan-y; cursor:grab; user-select:none; -webkit-user-select:none; transition:transform .22s cubic-bezier(.34,1.3,.64,1), opacity .22s; }
+.saa-kit.saa-deck .saa-pool > .saa-chip::after { content:"Flick it, or tap a box"; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8FA0FF; }
+.saa-kit.saa-deck .saa-pool > .saa-chip:hover { transform:none; }
+.saa-kit.saa-deck .saa-pool > .saa-chip:not(.is-top) { visibility:hidden; pointer-events:none; }
+.saa-kit.saa-deck .saa-pool > .saa-chip.is-top { z-index:2; }
+.saa-kit.saa-deck .saa-pool > .saa-chip.is-next { visibility:inherit; z-index:1; transform:translateY(9px) scale(.95); opacity:.7; }
+.saa-kit.saa-deck .saa-pool > .saa-chip.is-next { color:transparent; }
+.saa-kit.saa-deck .saa-pool > .saa-chip.is-next > *, .saa-kit.saa-deck .saa-pool > .saa-chip.is-next::after { visibility:hidden; }
+.saa-kit.saa-deck .saa-pool > .saa-chip.is-drag { transition:none; cursor:grabbing; box-shadow:0 18px 40px rgba(0,0,0,.5); }
+.saa-kit.saa-deck .saa-pool > .saa-chip img, .saa-kit.saa-deck .saa-pool > .saa-chip svg, .saa-kit.saa-deck .saa-deck-ghost img, .saa-kit.saa-deck .saa-deck-ghost svg { width:clamp(30px,6vh,48px); height:clamp(30px,6vh,48px); flex:none; margin:0; }
+.saa-kit.saa-deck .saa-deck-ghost { z-index:3; pointer-events:none; transition:transform .4s ease, opacity .4s ease; }
+.saa-kit.saa-deck .saa-bins { grid-template-columns:repeat(auto-fit, minmax(min(100%,130px), 1fr)); gap:10px; }
+.saa-kit.saa-deck .saa-bin { min-height:0; flex-direction:row; align-items:center; gap:8px; padding:10px 12px; cursor:pointer; border-style:solid; border-radius:14px; border-color:rgba(143,160,255,.6);
+  background:rgba(91,118,255,.10); box-shadow:0 3px 0 rgba(0,0,0,.28); }
+.saa-kit.saa-deck .saa-bin:hover, .saa-kit.saa-deck .saa-bin.over { border-color:#B8C4FF; background:rgba(91,118,255,.26); }
+.saa-kit.saa-deck .saa-bin-h { flex:1; min-width:0; margin:0; font-size:clamp(14px,2.2vh,18px); }
+.saa-kit.saa-deck .saa-bin-arr { order:-1; font-weight:800; color:#8FA0FF; }
+.saa-kit.saa-deck .saa-bin:last-child .saa-bin-arr { order:3; }
+.saa-kit.saa-deck .saa-bin-n { order:2; min-width:26px; padding:2px 7px; border-radius:999px; background:rgba(255,255,255,.10); font-size:13px; font-weight:700; text-align:center; }
+.saa-kit.saa-deck .saa-bin.saa-bin-hit .saa-bin-n { animation:saaPop .3s both; background:var(--k-ok-t); color:var(--k-ok); }
+.saa-kit.saa-deck:not(.is-done) .saa-bin .saa-chip { display:none; }
+.saa-kit.saa-deck.is-done .saa-pool { display:none; }
+.saa-kit.saa-deck.is-done .saa-bin { flex-direction:column; align-items:stretch; cursor:default; }
+.saa-kit.saa-deck.is-done .saa-bin-h { flex:none; }
+.saa-kit.saa-deck.is-done .saa-bin-arr, .saa-kit.saa-deck.is-done .saa-bin-n { display:none; }
+.saa-kit.saa-deck.is-done .saa-bin .saa-chip { min-height:36px; padding:5px 12px; }
+.saa-kit[data-theme="light"].saa-deck .saa-pool > .saa-chip, .saa-kit[data-theme="light"].saa-deck .saa-deck-ghost { background:#FFFFFF; border-color:#3C59F6; box-shadow:0 10px 24px rgba(14,26,79,.14), 0 2px 0 rgba(14,26,79,.10); }
+@media (max-width: 700px) { .saa-kit.saa-deck .saa-bin-arr { display:none; } .saa-kit.saa-deck .saa-bin { padding:9px 10px; } }
+.saa-kit[data-theme="light"].saa-deck .saa-bin { background:rgba(60,89,246,.06); }
+.saa-kit[data-theme="light"].saa-deck .saa-pool > .saa-chip::after, .saa-kit[data-theme="light"].saa-deck .saa-bin-arr { color:#3C59F6; }
+
+/* ---- order (domino chain) ---- */
+.saa-kit .saa-steps { list-style:none; margin:0; padding:0; display:grid; gap:8px; counter-reset:saa; }
+.saa-kit .saa-steps > li { counter-increment:saa; display:flex; align-items:center; gap:12px; min-height:clamp(46px,7vh,60px); padding:6px 10px 6px 12px; font-weight:600; font-size:clamp(14px,2.1vh,18px); cursor:grab; touch-action:none; transform-origin:left bottom; }
+.saa-kit .saa-steps > li::before { content:counter(saa); flex:0 0 28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--k-blue-t); color:#B8C4FF; font-size:13px; font-weight:700; }
+.saa-kit .saa-steps > li.picked { border-color:var(--k-blue); background:var(--k-blue-t); }
+.saa-kit .saa-steps > li.dragging { opacity:.4; }
+.saa-kit .saa-steps > li.good { border-color:var(--k-ok); background:var(--k-ok-t); }
+.saa-kit .saa-steps > li.off { border-color:var(--k-bad); }
+.saa-kit .saa-steps > li .saa-mv { margin-left:auto; display:flex; gap:4px; }
+.saa-kit .saa-steps > li .saa-mv button { width:34px; height:34px; border-radius:10px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); display:grid; place-items:center; }
+@keyframes saaTopple { 0%{transform:none} 60%{transform:rotate(-8deg)} 100%{transform:none} }
+.saa-kit.toppled .saa-steps > li { animation:saaTopple .5s ease both; }
+
+/* ---- spot (detective) ---- */
+.saa-kit .saa-text { padding:clamp(12px,2.4vh,20px); border-radius:14px; background:#F6F4EF; color:#0E1A4F; font-size:clamp(14px,2.2vh,18px); line-height:1.9; box-shadow:0 14px 34px rgba(0,0,0,.45); }
+.saa-kit .saa-text .saa-s { cursor:pointer; padding:2px 3px; margin:0 -1px; border-radius:5px; border-bottom:2px dotted rgba(60,89,246,.55); -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+.saa-kit .saa-text .saa-s:hover { background:rgba(60,89,246,.14); }
+.saa-kit .saa-text .saa-s.on { background:rgba(255,214,102,.75); border-bottom-color:transparent; }
+.saa-kit.checked .saa-s.hit { background:rgba(79,224,168,.55); }
+.saa-kit.checked .saa-s.miss { background:rgba(255,138,138,.3); box-shadow:0 0 0 2px #FF8A8A; }
+.saa-kit.checked .saa-s.false { background:rgba(128,137,172,.35); }
+.saa-kit.checked .saa-s { border-bottom-color:transparent; }
+
+/* ---- stamp ---- */
+.saa-kit .saa-rows { display:grid; gap:8px; }
+.saa-kit .saa-row { display:flex; align-items:center; gap:10px; padding:8px 10px 8px 14px; min-height:clamp(50px,7.4vh,64px); position:relative; }
+.saa-kit .saa-row-t { flex:1; font-weight:600; font-size:clamp(14px,2.1vh,18px); line-height:1.3; }
+.saa-kit .saa-stamps { display:flex; gap:6px; flex:0 0 auto; }
+.saa-kit .saa-stamp-btn { padding:7px 12px; font-size:13px; font-weight:700; min-height:38px; box-shadow:none; }
+.saa-kit .saa-row.done { border-color:var(--k-ok); background:var(--k-ok-t); }
+.saa-kit .saa-row.done .saa-stamps { display:none; }
+.saa-kit .saa-row .saa-ink { display:none; font-weight:800; letter-spacing:.08em; text-transform:uppercase; font-size:13px; color:var(--k-ok); border:2px solid var(--k-ok); border-radius:8px; padding:3px 8px; transform:rotate(-6deg); }
+.saa-kit .saa-row.done .saa-ink { display:inline-block; animation:saaPop .3s both; }
+
+@media (prefers-reduced-motion: reduce) { .saa-kit *, .saa-kit { animation:none !important; transition:none !important; } }
+@media (max-width: 600px) { .saa-kit .saa-row { flex-wrap:wrap; } .saa-kit .saa-stamps { width:100%; } .saa-kit .saa-stamp-btn { flex:1; } }
+
+/* glow used when Next is pressed too early (same look as the idle nudge) */
+@keyframes saaKGlow { 0%, 100% {box-shadow:0 0 0 0 rgba(143,160,255,0)} 50% {box-shadow:0 0 0 5px rgba(143,160,255,.5),0 0 26px rgba(143,160,255,.6)} }
+.saa-kit .saa-nudge { animation:saaKGlow 1.3s ease-in-out infinite !important; }
+/* short screens (small laptops): tighter options and cards */
+@media (max-height: 660px) {
+  .saa-kit { gap: 6px; }
+  .saa-kit .saa-q { font-size: 15px; }
+  .saa-kit .saa-k-opts, .saa-kit .saa-steps, .saa-kit .saa-rows { gap: 5px; }
+  .saa-kit .saa-k-opt, .saa-kit .saa-steps > li { min-height: 36px; padding: 4px 12px; font-size: 13.5px; }
+  .saa-kit .saa-k-opt::before { flex-basis: 18px; height: 18px; }
+  .saa-kit .saa-card { min-height: 64px; }
+  .saa-kit .saa-bin { min-height: 64px; }
+  .saa-kit .saa-k-why { min-height: 1.2em; font-size: 13px; }
+}
+/* light-theme games: <div class="saa-kit" data-theme="light" ...> */
+.saa-kit[data-theme="light"] { --k-ink:#0E1A4F; --k-dim:#5C6690; --k-line:rgba(14,26,79,.22); --k-blue-t:rgba(60,89,246,.10); --k-ok:#0B8A5F; --k-ok-t:rgba(11,138,95,.10); --k-bad:#C0392B; --k-bad-t:rgba(192,57,43,.08); }
+.saa-kit[data-theme="light"] .saa-k-opt, .saa-kit[data-theme="light"] .saa-card .saa-front, .saa-kit[data-theme="light"] .saa-chip, .saa-kit[data-theme="light"] .saa-steps > li, .saa-kit[data-theme="light"] .saa-row { background:#FFFFFF; box-shadow:0 2px 0 rgba(14,26,79,.10); }
+.saa-kit[data-theme="light"] .saa-k-opt::before { border-color:rgba(14,26,79,.4); }
+.saa-kit[data-theme="light"] .saa-bin { background:rgba(14,26,79,.03); border-color:rgba(60,89,246,.5); }
+.saa-kit[data-theme="light"] .saa-k-status, .saa-kit[data-theme="light"] .saa-front::after { color:#3C59F6; }
+.saa-kit[data-theme="light"] .saa-text { box-shadow:0 2px 0 rgba(14,26,79,.10), 0 0 0 1px rgba(14,26,79,.12); }
+
+/* ---- match (Band Connect; data-style="wire" = Cause Circuit cable). Lines are SVG in the board's own px ---- */
+.saa-kit.saa-match { position:relative; --m-live:#B8C4FF; --m-case:rgba(6,10,36,.9); }
+.saa-kit .saa-m-board { --m-stack:0; position:relative; display:grid; grid-template-columns:minmax(0,1fr) clamp(40px,15%,96px) minmax(0,1fr); align-items:start; }
+.saa-kit .saa-m-left, .saa-kit .saa-m-right { display:flex; flex-direction:column; gap:clamp(6px,1.3vh,10px); min-width:0; position:relative; z-index:2; }
+.saa-kit .saa-m-left { grid-column:1; } .saa-kit .saa-m-right { grid-column:3; }
+.saa-kit .saa-m-lines { position:absolute; left:0; top:0; width:100%; height:100%; overflow:visible; pointer-events:none; z-index:1; }
+.saa-kit .saa-m-link path { fill:none; stroke-linecap:round; stroke-linejoin:round; }
+.saa-kit .saa-m-case { stroke:transparent; stroke-width:0; }
+.saa-kit .saa-m-core { stroke:var(--m-live); stroke-width:4; }
+.saa-kit .saa-m-link.is-live .saa-m-core { stroke-dasharray:1 0; opacity:.95; }
+.saa-kit .saa-m-link.is-ok .saa-m-core { stroke:var(--k-ok); }
+.saa-kit .saa-m-link.is-bad .saa-m-core { stroke:var(--k-bad); }
+.saa-kit.saa-match:not(.saa-m-pick) .saa-m-item, .saa-kit.saa-match:not(.saa-m-pick) .saa-m-target {
+  position:relative; display:flex; align-items:center; gap:10px; width:100%; min-height:clamp(44px,7vh,56px); margin:0; padding:7px 14px;
+  text-align:left; font-weight:600; font-size:clamp(14px,2.1vh,18px); line-height:1.25; touch-action:none; user-select:none; -webkit-user-select:none;
+  border:1.5px solid var(--k-line); background:rgba(255,255,255,.07); border-radius:14px; box-shadow:0 3px 0 rgba(0,0,0,.28);
+  transition:transform .12s, border-color .12s, background .12s, box-shadow .12s; }
+.saa-kit.saa-match:not(.saa-m-pick) .saa-m-target { padding-left:18px; background:rgba(91,118,255,.10); }
+.saa-kit.saa-match:not(.saa-m-pick) .saa-m-item { padding-right:18px; }
+.saa-kit.saa-match .saa-m-target img, .saa-kit.saa-match .saa-m-target svg { width:24px; height:24px; flex:0 0 24px; }
+.saa-kit.saa-match:not(.saa-m-pick) :is(.saa-m-item, .saa-m-target):not(:disabled):hover { border-color:var(--k-blue); }
+.saa-kit.saa-match .is-picked { border-color:var(--k-blue) !important; background:var(--k-blue-t) !important; box-shadow:0 0 0 3px rgba(91,118,255,.35), 0 3px 0 rgba(0,0,0,.28) !important; }
+.saa-kit.saa-match.arm-to .saa-m-target:not(:disabled), .saa-kit.saa-match.arm-from .saa-m-item:not(:disabled), .saa-kit.saa-match .over { border-style:dashed; border-color:#8FA0FF; }
+.saa-kit.saa-match .saa-m-item.is-src { border-color:var(--k-blue); }
+.saa-kit.saa-match .is-linked { border-color:var(--k-ok) !important; background:var(--k-ok-t) !important; cursor:default; box-shadow:none !important; opacity:1; }
+@keyframes saaMPulse { 0%{transform:none} 45%{transform:scale(1.04)} 100%{transform:none} }
+.saa-kit.saa-match .is-linked { animation:saaMPulse .3s ease-out; }
+.saa-kit.saa-match .saa-m-dot { position:absolute; top:50%; width:12px; height:12px; margin-top:-6px; border-radius:50%; background:#141E52; border:2px solid #8FA0FF; pointer-events:none; }
+.saa-kit.saa-match .saa-m-item .saa-m-dot { right:-7px; }
+.saa-kit.saa-match .saa-m-target .saa-m-dot { left:-7px; }
+.saa-kit.saa-match .is-linked .saa-m-dot { background:var(--k-ok); border-color:var(--k-ok); }
+.saa-kit.saa-match .is-picked .saa-m-dot, .saa-kit.saa-match .is-src .saa-m-dot { background:var(--m-live); }
+.saa-kit.saa-match .saa-m-n { display:none; margin-left:auto; flex:none; min-width:24px; height:24px; padding:0 6px; border-radius:999px; background:var(--k-ok); color:#0B1A3A; font-size:13px; font-weight:800; line-height:24px; text-align:center; }
+/* wire look: a dark cable casing round a bright core, square sockets */
+.saa-kit.saa-m-wire .saa-m-case { stroke:var(--m-case); stroke-width:9; }
+.saa-kit.saa-m-wire .saa-m-core { stroke-width:3.5; }
+.saa-kit.saa-m-wire .saa-m-link.is-ok .saa-m-core { filter:drop-shadow(0 0 4px rgba(79,224,168,.8)); }
+.saa-kit.saa-m-wire .saa-m-dot { width:14px; height:14px; margin-top:-7px; border-radius:4px; background:#0B1236; box-shadow:inset 0 0 0 3px #0B1236, inset 0 0 0 5px rgba(143,160,255,.55); border-color:#8FA0FF; }
+/* pick mode: a plug in the left gutter, one socket per option; the game keeps its own option styling */
+.saa-kit.saa-m-pick { padding-left:34px; }
+.saa-kit.saa-m-pick .saa-m-target { position:relative; }
+.saa-kit.saa-m-pick .saa-m-target .saa-m-dot { left:-21px; }
+.saa-kit.saa-m-pick .saa-m-plug { position:absolute; left:9px; top:-10px; width:16px; height:16px; border-radius:5px; background:#8FA0FF; border:2px solid #0B1236; box-shadow:0 0 0 2px rgba(143,160,255,.45); cursor:grab; touch-action:none; z-index:3; }
+.saa-kit.saa-m-pick .saa-m-plug::before { content:""; position:absolute; inset:-14px; }
+.saa-kit.saa-m-pick[data-wire="ok"] .saa-m-plug, .saa-kit.saa-m-pick .saa-m-on.is-right .saa-m-dot, .saa-kit.saa-m-pick .saa-m-on.right .saa-m-dot { background:var(--k-ok); }
+.saa-kit.saa-m-pick[data-wire="bad"] .saa-m-plug, .saa-kit.saa-m-pick .saa-m-on.is-wrong .saa-m-dot, .saa-kit.saa-m-pick .saa-m-on.wrong .saa-m-dot { background:var(--k-bad); }
+.saa-kit.saa-m-pick .saa-m-on .saa-m-dot { background:var(--m-live); }
+@media (max-height: 660px) {
+  .saa-kit.saa-match:not(.saa-m-pick) .saa-m-item, .saa-kit.saa-match:not(.saa-m-pick) .saa-m-target { min-height:38px; padding-top:4px; padding-bottom:4px; font-size:14px; }
+  .saa-kit .saa-m-left, .saa-kit .saa-m-right { gap:5px; }
+}
+/* phones: the targets stack under the items, no lines; a number badge shows each pair (tap path only) */
+@media (max-width: 700px) {
+  .saa-kit .saa-m-board { --m-stack:1; grid-template-columns:minmax(0,1fr); row-gap:16px; }
+  .saa-kit .saa-m-right { grid-column:1; }
+  .saa-kit .saa-m-right::before { content:""; display:block; height:0; margin:-8px 8px 2px; border-top:1.5px dashed rgba(143,160,255,.45); }
+  .saa-kit .saa-m-board .saa-m-lines, .saa-kit .saa-m-board .saa-m-dot { display:none; }
+  .saa-kit.saa-match:not(.saa-m-pick) .saa-m-item, .saa-kit.saa-match:not(.saa-m-pick) .saa-m-target { touch-action:manipulation; padding-left:14px; padding-right:14px; }
+  .saa-kit.saa-match .is-linked .saa-m-n { display:inline-block; }
+}
+.saa-kit[data-theme="light"].saa-match { --m-live:#3C59F6; --m-case:rgba(14,26,79,.85); }
+.saa-kit[data-theme="light"].saa-match:not(.saa-m-pick) :is(.saa-m-item, .saa-m-target) { background:#FFFFFF; box-shadow:0 2px 0 rgba(14,26,79,.10); }
+.saa-kit[data-theme="light"].saa-match .saa-m-dot { background:#FFFFFF; border-color:#3C59F6; }
+.saa-kit[data-theme="light"].saa-match .saa-m-n { color:#fff; }
+
+/* three or more boxes: no flick (tap or drag), and the count sits under the label so long names fit */
+.saa-kit.saa-deck.saa-deck-many .saa-pool > .saa-chip::after { content:"Tap a box, or drag the card"; }
+.saa-kit.saa-deck.saa-deck-many .saa-bins { grid-template-columns:repeat(auto-fit, minmax(min(100%,96px), 1fr)); gap:8px; }
+.saa-kit.saa-deck.saa-deck-many:not(.is-done) .saa-bin { flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:8px 6px; text-align:center; }
+.saa-kit.saa-deck.saa-deck-many:not(.is-done) .saa-bin-h { flex:none; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:clamp(13px,2vh,17px); overflow-wrap:anywhere; }
+.saa-kit.saa-deck.saa-deck-many .saa-bin-n { order:3; }
+
+/* ---- dial (Pressure Gauge / Volume Knob): a knob with labelled positions round it; the chat card swaps per position ---- */
+.saa-kit.saa-dial { --d-size:clamp(80px,14vh,104px); }
+.saa-kit .saa-d-ctl { display:grid; grid-template-columns:minmax(0,1fr) var(--d-size) minmax(0,1fr); grid-auto-rows:auto; column-gap:clamp(10px,2vw,16px); row-gap:8px; align-items:center; }
+.saa-kit .saa-d-pos { position:relative; display:inline-flex; align-items:center; gap:8px; max-width:100%; min-height:40px; margin:0; padding:6px 12px; text-align:left; font-weight:700; font-size:clamp(13px,2vh,16px); line-height:1.2;
+  border:1.5px solid var(--k-line); background:rgba(255,255,255,.07); border-radius:12px; box-shadow:0 3px 0 rgba(0,0,0,.28); transition:border-color .12s, background .12s; }
+.saa-kit .saa-d-pos:hover { border-color:var(--k-blue); }
+.saa-kit .saa-d-pos img, .saa-kit .saa-d-pos svg { width:22px; height:22px; flex:0 0 22px; margin:0; }
+.saa-kit .saa-d-pos small { display:block; margin-top:1px; font-size:12px; font-weight:600; color:var(--k-dim); }
+.saa-kit .saa-d-pos.is-on { border-color:var(--k-blue); background:var(--k-blue-t); box-shadow:0 0 0 3px rgba(91,118,255,.30), 0 3px 0 rgba(0,0,0,.28); }
+.saa-kit .saa-d-pos.is-seen::after { content:"\2713"; position:absolute; top:-7px; right:-7px; width:18px; height:18px; border-radius:50%; background:var(--k-ok); color:#0B1A3A; font-size:11px; font-weight:800; line-height:18px; text-align:center; }
+/* where each label sits: 4 = the four corners (clockwise from top left), 3 = left, top, right, 2 = left, right */
+.saa-kit.saa-d-n4 .saa-d-knob { grid-column:2; grid-row:1 / span 2; }
+.saa-kit.saa-d-n4 .saa-d-pos[data-pos="0"] { grid-column:1; grid-row:1; justify-self:end; align-self:end; }
+.saa-kit.saa-d-n4 .saa-d-pos[data-pos="1"] { grid-column:3; grid-row:1; justify-self:start; align-self:end; }
+.saa-kit.saa-d-n4 .saa-d-pos[data-pos="2"] { grid-column:3; grid-row:2; justify-self:start; align-self:start; }
+.saa-kit.saa-d-n4 .saa-d-pos[data-pos="3"] { grid-column:1; grid-row:2; justify-self:end; align-self:start; }
+.saa-kit.saa-d-n3 .saa-d-pos[data-pos="1"] { grid-column:2; grid-row:1; justify-self:center; }
+.saa-kit.saa-d-n3 .saa-d-pos[data-pos="0"] { grid-column:1; grid-row:2; justify-self:end; }
+.saa-kit.saa-d-n3 .saa-d-knob { grid-column:2; grid-row:2; }
+.saa-kit.saa-d-n3 .saa-d-pos[data-pos="2"] { grid-column:3; grid-row:2; justify-self:start; }
+.saa-kit.saa-d-n2 .saa-d-pos[data-pos="0"] { grid-column:1; grid-row:1; justify-self:end; }
+.saa-kit.saa-d-n2 .saa-d-knob { grid-column:2; grid-row:1; }
+.saa-kit.saa-d-n2 .saa-d-pos[data-pos="1"] { grid-column:3; grid-row:1; justify-self:start; }
+.saa-kit.saa-d-n3 .saa-d-pos[data-pos="1"] { white-space:nowrap; }
+.saa-kit.saa-d-nx .saa-d-ctl { display:flex; flex-wrap:wrap; justify-content:center; }
+.saa-kit.saa-d-nx .saa-d-knob { order:-1; flex:0 0 100%; max-width:var(--d-size); margin:0 calc(50% - var(--d-size) / 2); }
+/* the knob */
+.saa-kit .saa-d-knob { position:relative; width:var(--d-size); height:var(--d-size); border-radius:50%; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none;
+  background:radial-gradient(circle, rgba(91,118,255,.10) 55%, rgba(91,118,255,.18) 56%, rgba(91,118,255,.04) 72%); }
+.saa-kit.is-turning .saa-d-knob { cursor:grabbing; }
+.saa-kit .saa-d-knob:focus-visible { outline:2px solid #FFC168; outline-offset:3px; }
+.saa-kit .saa-d-ring { position:absolute; inset:0; border-radius:50%; pointer-events:none; }
+.saa-kit .saa-d-tick { position:absolute; left:50%; top:0; width:10px; height:50%; margin-left:-5px; transform-origin:50% 100%; }
+.saa-kit .saa-d-tick::before { content:""; position:absolute; left:50%; top:1px; width:7px; height:7px; margin-left:-3.5px; border-radius:50%; background:rgba(143,160,255,.55); transition:background .15s, transform .15s; }
+.saa-kit .saa-d-tick.is-on::before { background:#B8C4FF; transform:scale(1.35); box-shadow:0 0 8px rgba(143,160,255,.9); }
+.saa-kit .saa-d-face { position:absolute; inset:15%; border-radius:50%; background:linear-gradient(160deg, #3C4FB0, #1C2766); border:1.5px solid rgba(143,160,255,.75);
+  box-shadow:0 8px 18px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.12); transition:transform .35s cubic-bezier(.34,1.3,.64,1); }
+.saa-kit.is-turning .saa-d-face { transition:none; }
+.saa-kit .saa-d-notch { position:absolute; left:50%; top:8%; width:4px; height:32%; margin-left:-2px; border-radius:2px; background:#F6F4EF; box-shadow:0 0 6px rgba(184,196,255,.8); }
+/* the chat card: every position sits in the same cell, so the card keeps the height of the longest answer */
+.saa-kit .saa-d-chat { display:grid; padding:clamp(8px,1.6vh,12px) 12px; border-radius:14px; background:#F6F4EF; color:#0E1A4F; box-shadow:0 10px 26px rgba(0,0,0,.35); }
+.saa-kit .saa-dial-stop { grid-area:1/1; display:flex; flex-direction:column; gap:6px; min-width:0; visibility:hidden; opacity:0; transition:opacity .22s ease, visibility 0s .22s; }
+.saa-kit .saa-dial-stop.is-on { visibility:inherit; opacity:1; transition:opacity .22s ease; }
+.saa-kit .saa-d-you, .saa-kit .saa-d-ans { margin:0; padding:6px 11px 7px; font-size:clamp(13px,2vh,15.5px); line-height:1.4; font-weight:500; }
+.saa-kit .saa-d-you::before, .saa-kit .saa-d-ans::before { content:attr(data-who); display:block; font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; opacity:.75; }
+.saa-kit .saa-d-chat .saa-d-you { align-self:flex-end; max-width:92%; background:#3C59F6; color:#fff; border-radius:12px 12px 4px 12px; }
+.saa-kit .saa-d-you mark { background:rgba(255,255,255,.24); color:inherit; border-radius:4px; padding:0 3px; }
+.saa-kit .saa-d-chat .saa-d-ans { align-self:flex-start; max-width:100%; color:#0E1A4F; background:#FFFFFF; border:1px solid rgba(14,26,79,.12); border-radius:12px 12px 12px 4px; }
+.saa-kit .saa-d-ans::before { color:#3C59F6; opacity:1; }
+.saa-kit.saa-dial .saa-k-why { min-height:2.9em; }
+.saa-kit.saa-d-still .saa-d-face, .saa-kit.saa-d-still .saa-dial-stop { transition:none; }
+@media (max-height: 660px) {
+  .saa-kit.saa-dial { --d-size:76px; }
+  .saa-kit .saa-d-pos { min-height:34px; padding:4px 10px; font-size:13.5px; }
+  .saa-kit .saa-d-pos small { font-size:11px; }
+  .saa-kit .saa-d-ctl { row-gap:6px; }
+  .saa-kit .saa-d-chat { padding:7px 10px; }
+  .saa-kit .saa-d-you, .saa-kit .saa-d-ans { padding:4px 9px 5px; font-size:13px; line-height:1.35; }
+  .saa-kit .saa-dial-stop { gap:4px; }
+  .saa-kit.saa-dial .saa-k-why { min-height:2.7em; }
+}
+@media (max-width: 700px) {
+  .saa-kit.saa-dial { --d-size:84px; }
+  .saa-kit .saa-d-pos { padding:5px 9px; font-size:13.5px; gap:6px; }
+  .saa-kit .saa-d-pos img, .saa-kit .saa-d-pos svg { width:18px; height:18px; flex-basis:18px; }
+}
+.saa-kit[data-theme="light"] .saa-d-pos { background:#FFFFFF; box-shadow:0 2px 0 rgba(14,26,79,.10); }
+.saa-kit[data-theme="light"] .saa-d-chat { box-shadow:0 2px 0 rgba(14,26,79,.10), 0 0 0 1px rgba(14,26,79,.12); }
+.saa-kit[data-theme="light"] .saa-d-tick::before { background:rgba(60,89,246,.45); }
+.saa-kit[data-theme="light"] .saa-d-tick.is-on::before { background:#3C59F6; }
+
+/* locked Next: same button, clearly not ready yet */
+.saa-locked { opacity: .45 !important; filter: saturate(.35) !important; box-shadow: none !important; cursor: not-allowed !important; }
+/* phones: kit controls at least 44px to tap */
+@media (max-width: 700px), (pointer: coarse) {
+  .saa-kit .saa-steps button, .saa-kit .saa-row button, .saa-kit .saa-k-check, .saa-kit .saa-k-opt, .saa-kit .saa-stamp, .saa-kit .saa-st button { min-height: 44px; min-width: 44px; }
+}

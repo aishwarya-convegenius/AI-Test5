@@ -1,0 +1,350 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
+/* ==========================================================================
+   Swift AI Academy - activity frame upgrade layer (families B/C and one-offs)
+   Loaded AFTER style.css. Non-destructive: remove the two tags to roll back.
+   - Proportional scale (zoom) on big screens, wider column, never smaller than designed
+   - One option look, text lock, idle nudge glow, phone single column
+   ========================================================================== */
+:root { --z: 1; }
+
+/* ---- 1. scale up on big screens, widen the column ---- */
+.app {
+  zoom: var(--z);
+  height: calc(100dvh / var(--z)) !important;
+  max-width: calc(1280px / var(--z)) !important;
+  width: 100%;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.app > .stage, .app > main { max-width: none; }
+
+/* ---- 1b. left / right ---- */
+.saa-split { display: grid !important; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); column-gap: clamp(24px, 4vw, 56px); align-items: center; }
+.saa-split > .saa-lead, .saa-split > .saa-work { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.saa-split > .saa-lead > *, .saa-split > .saa-work > * { margin-left: 0; margin-right: 0; max-width: none; }
+@media (max-width: 700px) { .saa-split { display: block !important; } .saa-split > .saa-work { margin-top: 12px; } }
+
+/* ---- 2. one option look ---- */
+button.opt, .opt, .choice, .answer-btn, .option {
+  min-height: 46px;
+  border: 1.5px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s, background 0.12s, box-shadow 0.12s;
+}
+.opt:hover:not([disabled]), .choice:hover:not([disabled]), .option:hover:not([disabled]) { transform: translateY(-1px); border-color: #5B76FF; }
+.opt:active:not([disabled]), .choice:active:not([disabled]), .option:active:not([disabled]) { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.28); }
+
+/* ---- 3. text lock ---- */
+html, body, body * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
+img { -webkit-user-drag: none; }
+
+/* ---- 4. idle nudge ---- */
+@keyframes saaGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(143, 160, 255, 0), 0 0 0 rgba(143, 160, 255, 0); }
+  50%      { box-shadow: 0 0 0 5px rgba(143, 160, 255, 0.5), 0 0 26px rgba(143, 160, 255, 0.6); border-color: #8FA0FF; }
+}
+@keyframes saaGlowAmber {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 104, 0); }
+  50%      { box-shadow: 0 0 0 7px rgba(255, 193, 104, 0.55), 0 0 34px rgba(255, 193, 104, 0.85); }
+}
+.saa-nudge { animation: saaGlow 1.3s ease-in-out infinite !important; position: relative; z-index: 1; }
+.nav-btn.primary.saa-nudge, .primary.saa-nudge, .cta.saa-nudge { animation: saaGlowAmber 1.3s ease-in-out infinite !important; }
+@media (prefers-reduced-motion: reduce) { .saa-nudge { animation: none !important; outline: 2px solid #8FA0FF; } }
+
+/* ---- 5. phones: no scale, single column ---- */
+@media (max-width: 700px) { :root { --z: 1 !important; } .app { zoom: 1; height: 100dvh !important; max-width: 100% !important; } }
+
+/* ---- 6. one font everywhere (keeps Indic fallbacks) ---- */
+body, button, input, textarea, select { font-family: 'Instrument Sans', 'Noto Sans Gujarati', 'Noto Sans Devanagari', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+.saa-inner { display: contents; }
+.saa-inner.saa-split { display: grid !important; width: 100%; }
+/* phones: one column (this must come after the rule above, which is more specific than the one at the top) */
+@media (max-width: 700px) { .saa-inner.saa-split { display: block !important; } }
+
+/* ---- phones: scroll the area between header and footer (set by zoom.js) ---- */
+@media (max-width: 700px) {
+  .app.saa-phone { display: flex !important; flex-direction: column !important; }
+  .app.saa-phone > :is(header, footer, nav, .saa-header, .deck-foot, .foot, .nav-row, .bar, .topbar) { flex: 0 0 auto !important; }
+  .saa-scrollzone { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; max-height: none !important;
+    overflow-y: auto !important; overflow-x: hidden !important; justify-content: flex-start !important; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .saa-scrollzone .saa-scrollpath, .saa-scrollzone.saa-cur, .saa-scrollzone .saa-surface, .saa-scrollzone .saa-split {
+    height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; flex: 0 0 auto !important; justify-content: flex-start !important; }
+}
+
+/* phones: a card grows with its content inside the scroll area (beats the desktop skin's flex:1 / min-height:0) */
+@media (max-width: 700px) { html.saa-skin .saa-scrollzone .saa-surface, html.saa-skin .saa-scrollzone .saa-scrollpath { flex: 0 0 auto !important; height: auto !important; min-height: 0 !important; max-height: none !important; } }
+
+/* phone landscape (short and wide): the whole page scrolls as one column instead of overlapping; the footer stays at the bottom */
+@media (orientation: landscape) and (max-height: 480px) and (min-width: 701px) {
+  html { height: auto !important; overflow-y: auto !important; overflow-x: hidden !important; }
+  body { height: auto !important; overflow: visible !important; }
+  html body .app { height: auto !important; min-height: 100dvh; overflow: visible !important; }
+  html body .app > :is(main, .stage, .slides) { flex: none !important; height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; padding-bottom: 84px !important; }
+  html body .app :is(.page.active, .slide.active, .slide.show, .saa-cur) { flex: none !important; height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+  html body .app :is(.card, .saa-surface, .saa-split, .saa-inner) { height: auto !important; max-height: none !important; }
+  html body .app > :is(footer, nav.deck-foot, .slide-footer, .nav-row, .saa-navrow) { position: sticky !important; bottom: 0 !important; z-index: 20 !important; background: linear-gradient(180deg, rgba(8,13,40,0) 0, rgba(8,13,40,.92) 14px, #080D28 100%); padding-top: 10px !important; }
+}
+
+/* ==========================================================================
+   COMMON (all games): start screen, "Your task" line, one-amber guard
+   ========================================================================== */
+/* ---- start screen (handoff: Module Opening Premium) ---- */
+.saa-start{position:fixed;inset:0;z-index:9999;overflow:hidden;background:#020306;color:#FAFAF8;
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  background-image:radial-gradient(ellipse 55% 60% at 22% 8%,rgba(91,118,255,.22) 0,rgba(91,118,255,0) 60%),radial-gradient(ellipse 48% 55% at 82% 96%,rgba(243,171,49,.09) 0,rgba(243,171,49,0) 60%);
+  transition:opacity .5s,visibility .5s;-webkit-user-select:none;user-select:none}
+.saa-start.gone{opacity:0;visibility:hidden}
+.saa-start .saa-ghost{position:absolute;left:50%;top:-30vh;transform:translateX(-50%);font-size:min(46vw,58vh);font-weight:600;color:#fff;opacity:.035;letter-spacing:-.05em;line-height:1;pointer-events:none}
+.saa-start .saa-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:clamp(24px,7vh,60px) clamp(20px,6vw,72px)}
+.saa-start .saa-brand{display:flex;align-items:center;gap:14px}
+.saa-start .saa-brand img,.saa-start .saa-brand .brand-mark{width:40px;height:36px;object-fit:contain;background-size:contain}
+.saa-start .saa-brand span{font-size:clamp(16px,2.6vh,22px);letter-spacing:.24em;color:#AEB6D4;font-weight:600}
+.saa-start .saa-mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(14px,3.6vh,30px);text-align:center}
+.saa-start .saa-eb{font-size:clamp(13px,2vh,17px);letter-spacing:.36em;color:#6B7396;font-weight:500;text-transform:uppercase}
+.saa-start h1{margin:0;font-size:clamp(30px,min(6vw,11vh),76px);font-weight:700;line-height:1.06;letter-spacing:-.01em;max-width:14em;color:#FAFAF8}
+.saa-start .saa-tag{margin:0;font-size:clamp(15px,2.4vh,20px);font-weight:400;color:#7C86AE;max-width:40em;line-height:1.5}
+.saa-start .saa-go{display:flex;align-items:center;gap:10px;margin-top:clamp(4px,1.6vh,14px);padding:17px 40px;border-radius:999px;border:none;cursor:pointer;font:inherit;font-size:16px;font-weight:700;color:#241300;
+  background:linear-gradient(135deg,#FFC168,#F3AB31);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 34px rgba(243,171,49,.35);transition:transform .15s}
+.saa-start .saa-go:hover{transform:translateY(-2px)}
+.saa-start .saa-go:focus-visible{outline:2px solid #FFC168;outline-offset:3px}
+@media print{.saa-start{display:none}}
+
+/* ---- "Your task" line: the game's own instruction, shown the same way everywhere ---- */
+.saa-do{display:block!important;margin:10px 0!important;padding:12px 16px!important;border-radius:14px!important;background:rgba(91,118,255,.16)!important;border:1px solid rgba(91,118,255,.6)!important;
+  color:#F6F4EF!important;font-weight:600!important;line-height:1.45!important;text-align:left!important}
+.saa-do .saa-do-label{color:#8FA0FF;font-weight:700;margin-right:.3em}
+
+/* ---- one amber action per screen: Next turns blue while the screen has its own amber action ---- */
+.saa-demote{background:transparent!important;background-image:none!important;color:#F6F4EF!important;border:1.5px solid rgba(143,160,255,.6)!important;box-shadow:none!important}
+.saa-demote svg{stroke:currentColor}
+
+/* ---- one progress indicator everywhere: thin bar + "N / T" in the bottom bar ---- */
+:is(footer, .deck-foot, .nav-row, .foot, .slide-footer, .chat-footer) :is(.dashes, #deck-dots, .deck-dots, #progressDots, .progress-track, #segBar, .seg-bar, .page-dots, #pageDots, #progress-dots, #progress.progress, .progress, .deck-count, #deck-count, #pageNum, #pageName, #pageCount, .page-count, #counter, .counter, .count, #stepCount, .step-count, #stageName, .stage-name, #sectionName, .section-name, .page-label, .deck-meta):not(.saa-prog):not(.saa-prog *) { display: none !important; }
+footer.bar > .track { display: none !important; }
+.saa-prog { display: flex !important; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 140px; max-width: 380px; margin: 0 auto; }
+.saa-prog-bar { flex: 1; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.saa-prog-fill { display: block; height: 100%; width: 0; border-radius: 999px; background: #5B76FF; transition: width .3s ease; }
+.saa-prog-n { font-size: 12px; font-weight: 600; letter-spacing: .12em; color: #AEB6D4; white-space: nowrap; font-variant-numeric: tabular-nums; }
+:is(.deck-progress, .footer-progress, .bar-mid, .page-meta, .foot-left, .progress-wrap) { display: flex !important; align-items: center; justify-content: center; flex: 1 1 auto; min-width: 0; }
+/* same bottom-bar order everywhere: Back | progress | Next */
+footer.foot { display: flex !important; align-items: center; }
+footer.foot > .nav { display: contents !important; }
+footer.foot #back { order: 0; }
+footer.foot > .foot-left { order: 1; flex: 1 1 auto; justify-content: center !important; }
+footer.foot #primary { order: 2; }
+/* same bar length everywhere */
+.saa-prog { min-width: min(260px, 42vw); }
+.saa-prog-bar { min-width: 120px; }
+/* Back is a pill everywhere */
+#navBack.back-link { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); color: #F6F4EF; text-decoration: none; }
+/* progress always centred on the bottom bar, whatever the button widths */
+:is(footer, .deck-foot, .nav-row, .foot, .slide-footer, .chat-footer):has(.saa-prog) { position: relative !important; }
+:is(footer, .deck-foot, .nav-row, .foot, .slide-footer, .chat-footer) :is(.deck-progress, .footer-progress, .bar-mid, .page-meta, .foot-left, .progress-wrap, .foot-row):has(.saa-prog) { position: static !important; }
+.saa-prog { position: absolute !important; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(380px, 40vw); max-width: none; margin: 0 !important; }
+@media (max-width: 600px) { .saa-prog { width: min(170px, 38vw); min-width: 0; } .saa-prog-bar { min-width: 50px; } }
+/* phones: the progress gets its own centred line above Back / Next, in every game */
+@media (max-width: 600px) {
+  :is(footer, .deck-foot, .nav-row, .foot, .slide-footer, .chat-footer):has(.saa-prog) { flex-wrap: wrap !important; row-gap: 8px; }
+  :is(.deck-progress, .footer-progress, .bar-mid, .page-meta, .foot-left, .progress-wrap, .foot-row):has(.saa-prog) { order: -1 !important; flex: 1 1 100% !important; }
+  .saa-prog { position: static !important; transform: none !important; width: 100% !important; order: -1; flex: 1 1 100%; }
+  footer.foot > .foot-left { flex: 1 1 100% !important; }
+  footer.foot #back { margin-right: auto; }
+}
+@media (max-width: 600px) {
+  :is(.bar-row, .foot-row):has(.saa-prog) { display: flex !important; flex-wrap: wrap !important; row-gap: 8px; justify-content: space-between; }
+  :is(.bar-row, .foot-row) > :is(.bar-mid, .saa-prog) { order: -1 !important; flex: 1 1 100% !important; }
+}
+
+/* staff codes are hidden from learners (see common.js) */
+.saa-staff { display: none !important; }
+
+/* ==========================================================================
+   SKIN: make every dark game look like game 1 (reference: Applied-AI-MC1)
+   Only active when the page is dark (html.saa-skin). Sizes are divided by --z so a
+   zoomed page ends up at the same on-screen size as game 1.
+   ========================================================================== */
+html.saa-skin { --zz: var(--z, 1); }
+
+/* ---- frame: same outer gutters as game 1 ---- */
+html.saa-skin .app {
+  padding: calc(clamp(8px, 1.6vh, 16px) / var(--zz)) calc(clamp(16px, 3vw, 48px) / var(--zz)) !important;
+  max-width: none !important;
+  box-sizing: border-box;
+}
+
+/* ---- header: logo + "Swift AI / Academy" + eyebrow and title, controls on the right ---- */
+html.saa-skin :is(.saa-header, header.top) {
+  display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: calc(clamp(16px, 3vw, 48px) / var(--zz)) !important;
+  padding: 0 !important; margin: 0 0 calc(clamp(6px, 1.4vh, 14px) / var(--zz)) !important;
+  min-height: 0 !important; height: auto !important; border: 0 !important; background: none !important; box-shadow: none !important;
+}
+html.saa-skin :is(.saa-header, header.top) > :is(.saa-brand, .brand, .top-meta) { display: none !important; }
+html.saa-skin .saa-hd-brand { display: flex; align-items: center; gap: calc(12px / var(--zz)); flex: 0 0 auto; }
+html.saa-skin .saa-hd-brand img, html.saa-skin .saa-hd-brand .brand-mark { width: calc(30px / var(--zz)) !important; height: calc(27px / var(--zz)) !important; object-fit: contain; background-size: contain !important; display: block; }
+html.saa-skin .saa-wm { line-height: 1; }
+html.saa-skin .saa-wm .n { display: block; font-size: calc(21px / var(--zz)); font-weight: 700; letter-spacing: -.02em; color: #F6F4EF; text-transform: none; }
+html.saa-skin .saa-wm .s { display: block; font-size: calc(9px / var(--zz)); font-weight: 600; letter-spacing: .34em; text-transform: uppercase; color: #7C86AE; margin-top: calc(3px / var(--zz)); }
+html.saa-skin .saa-hd-ttl { flex: 0 1 auto; min-width: 0; }
+/* one header row, like game 1: the title gives way first, then extra tools shrink */
+html.saa-skin :is(.saa-header, header.top) { flex-wrap: nowrap !important; }
+html.saa-skin .saa-hd-ttl > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.saa-skin .saa-hd-brand { flex: 0 0 auto; }
+html.saa-skin .topbar-tools { flex: 0 1 auto; min-width: 0; }
+html.saa-skin .topbar-tools > * { min-width: 0; flex-shrink: 1; }
+html.saa-skin .topbar-tools ~ .saa-header-actions { margin-left: calc(8px / var(--zz)) !important; flex: 0 0 auto; }
+html.saa-skin .saa-hd-eb { margin: 0 0 calc(2px / var(--zz)); font-size: calc(11.5px / var(--zz)); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: #8FA0FF; line-height: 1.3; }
+html.saa-skin .saa-hd-h { margin: 0; font-size: calc(clamp(16px, 2.6vh, 22px) / var(--zz)); font-weight: 700; letter-spacing: -.03em; line-height: 1.1; color: #F6F4EF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.saa-skin :is(.saa-header-actions, .topbar-tools) { margin-left: auto !important; display: flex; align-items: center; gap: calc(8px / var(--zz)); }
+html.saa-skin .saa-icon-btn { width: calc(38px / var(--zz)) !important; height: calc(38px / var(--zz)) !important; min-height: 0 !important; padding: 0 !important; border-radius: 50% !important; display: grid !important; place-items: center; background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.16) !important; color: #F6F4EF !important; }
+html.saa-skin .saa-ghost-pill { min-height: calc(38px / var(--zz)) !important; height: auto !important; padding: 0 calc(14px / var(--zz)) !important; border-radius: 999px !important; display: inline-flex !important; align-items: center; gap: calc(8px / var(--zz)); font-size: calc(13px / var(--zz)) !important; font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important; background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.16) !important; color: #F6F4EF !important; }
+
+/* ---- the current page fills the space between header and footer ---- */
+html.saa-skin .saa-cur { flex: 1 1 auto !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; }
+html.saa-skin :is(.stage, main.stage, #slides, .slides) { flex: 1 1 auto !important; min-height: 0 !important; display: flex !important; flex-direction: column !important; }
+
+/* ---- one card look: full width, fills the height, glass, 20px corners, content centred ---- */
+html.saa-skin .saa-surface {
+  flex: 1 1 auto !important; min-height: 0 !important; width: 100% !important; max-width: none !important; margin: 0 !important;
+  border-radius: 20px !important; background: rgba(255,255,255,.035) !important; border: 1px solid rgba(255,255,255,.10) !important;
+  box-shadow: none !important; backdrop-filter: blur(10px);
+  padding: calc(clamp(14px, 3vh, 32px) / var(--zz)) calc(clamp(20px, 3.5vw, 56px) / var(--zz)) !important;
+  box-sizing: border-box !important;
+}
+html.saa-skin .saa-surface:not(.saa-split) { display: flex !important; flex-direction: column !important; justify-content: center !important; }
+html.saa-skin .saa-surface.saa-split, html.saa-skin .saa-surface > .saa-split, html.saa-skin .saa-surface > .saa-inner.saa-split { align-content: center !important; align-items: center !important; column-gap: calc(clamp(24px, 4vw, 72px) / var(--zz)) !important; }
+/* Deck games: the slide holds the card edge to edge */
+html.saa-skin .slide { padding: 0 !important; align-items: stretch !important; justify-content: stretch !important; }
+html.saa-skin .slide > .card.saa-surface { height: 100% !important; }
+
+/* ---- type: eyebrow, heading, body, task line exactly like game 1 ---- */
+html.saa-skin :is(.saa-cur, .saa-surface) :is(.kicker, .eyebrow, .saa-eyebrow, .q-kicker, .hero-kicker) {
+  font-size: calc(11.5px / var(--zz)) !important; font-weight: 600 !important; letter-spacing: .22em !important; text-transform: uppercase !important;
+  color: #8FA0FF !important; margin: 0 0 calc(6px / var(--zz)) !important; padding: 0 !important; background: none !important;
+}
+html.saa-skin :is(.saa-cur, .saa-surface) :is(.kicker, .eyebrow, .saa-eyebrow, .q-kicker, .hero-kicker)::before { display: none !important; }
+html.saa-skin :is(.saa-lead, .head) :is(h1, h2, .title) {
+  font-size: calc(clamp(22px, 4.4vh, 54px) / var(--zz)) !important; font-weight: 700 !important; letter-spacing: -.035em !important;
+  line-height: 1.14 !important; color: #F6F4EF !important; margin: 0 0 calc(14px / var(--zz)) !important;
+}
+html.saa-skin :is(.saa-lead, .head) p:not(.do):not(.saa-do):not(.kicker):not(.eyebrow):not(.saa-eyebrow):not(.q-kicker):not(.caution-note):not(.typed) {
+  font-size: calc(clamp(14px, 2.3vh, 24px) / var(--zz)) !important; font-weight: 500 !important; line-height: 1.6 !important; color: #F6F4EF !important;
+  margin: 0 0 calc(clamp(8px, 1.6vh, 14px) / var(--zz)) !important; max-width: 82ch;
+}
+html.saa-skin :is(.do, .saa-do) {
+  font-size: calc(clamp(14px, 2.3vh, 24px) / var(--zz)) !important; font-weight: 600 !important; line-height: 1.45 !important;
+  padding: calc(clamp(10px, 1.8vh, 14px) / var(--zz)) calc(16px / var(--zz)) !important; border-radius: calc(14px / var(--zz)) !important;
+  margin: calc(clamp(10px, 2vh, 18px) / var(--zz)) 0 0 !important;
+  background: rgba(91,118,255,.16) !important; border: 1px solid rgba(91,118,255,.6) !important; color: #F6F4EF !important;
+}
+
+/* ---- footer buttons: Back and Next exactly like game 1 ---- */
+html.saa-skin :is(footer, .deck-foot, .nav-row, .foot, .slide-footer) { margin-top: calc(10px / var(--zz)) !important; }
+html.saa-skin button.saa-navtxt {
+  min-height: calc(52px / var(--zz)) !important; height: auto !important; padding: 0 calc(30px / var(--zz)) !important;
+  font-size: calc(15.5px / var(--zz)) !important; font-weight: 700 !important; letter-spacing: -.01em !important; border-radius: 999px !important;
+  display: inline-flex !important; align-items: center; justify-content: center; gap: 0 !important;
+}
+html.saa-skin button.saa-navtxt svg, html.saa-skin button.saa-navtxt .ic { display: none !important; }
+html.saa-skin button.saa-navtxt.saa-back { background: rgba(255,255,255,.05) !important; border: 1px solid rgba(255,255,255,.14) !important; color: #F6F4EF !important; box-shadow: none !important; }
+html.saa-skin button.saa-navtxt.saa-back:disabled, html.saa-skin button.saa-navtxt.saa-back.is-hidden { opacity: .35; }
+html.saa-skin button.nav-circle { width: calc(52px / var(--zz)) !important; height: calc(52px / var(--zz)) !important; }
+
+/* phones: like game 1, the title is hidden */
+@media (max-width: 900px) { html.saa-skin .saa-hd-ttl { display: none; } }
+
+/* footer order exactly like game 1: Back on the left, progress in the centre, Next on the right edge;
+   any extra button (Start over, Back to Build) sits just before Next */
+html.saa-skin .saa-navrow { display: flex !important; align-items: center !important; width: 100%; box-sizing: border-box; }
+html.saa-skin .saa-navrow > button.saa-back { order: 0; margin-right: auto !important; }
+html.saa-skin .saa-navrow > :is(#primary, #deck-next, #navNext, #nav-next, #nextBtn, #next-btn, .btn-next, .nav-btn.primary, .nav-circle.primary, .primary) { order: 99 !important; margin-left: 0 !important; }
+/* no visible Back: Next still goes to the right edge */
+html.saa-skin .saa-navrow:not(:has(> button.saa-back:not([hidden]):not(.is-hidden):not(.hidden))) > :is(#primary, #deck-next, #navNext, #nav-next, #nextBtn, #next-btn, .btn-next, .nav-btn.primary, .nav-circle.primary, .primary) { margin-left: auto !important; }
+html.saa-skin .saa-navrow > :is(#deck-restart, #navRestart, #nav-restart, .btn-restart, .back-to-build, [data-action="restart"]) { order: 98 !important; margin-left: auto !important; margin-right: calc(10px / var(--zz)) !important; }
+/* never show a nav button that the game has hidden */
+html.saa-skin button.saa-navtxt[hidden], html.saa-skin button.saa-navtxt.is-hidden, html.saa-skin button.saa-navtxt.hidden { display: none !important; }
+
+/* games with a light/dark switch: in light mode the game keeps its own header, so hide the dark-frame brand */
+html[data-saa-themes]:not(.saa-skin) .saa-hd-brand, html[data-saa-themes]:not(.saa-skin) .saa-hd-ttl { display: none; }
+html[data-theme="light"] .saa-vo-b { color: #1B2A6B; background: #fff; border-color: rgba(27,42,107,.18); }
+/* a game that hides its nav button with an inline style keeps it hidden */
+html.saa-skin button.saa-navtxt[style*="display: none"], html.saa-skin button.saa-navtxt[style*="display:none"] { display: none !important; }
+
+/* ---- frame spacing exactly like game 1: header, 10px gap, card fills the rest, 10px gap, footer (52px pills), page padding below ---- */
+html.saa-skin .app { display: flex !important; flex-direction: column !important; }
+html.saa-skin .app > :is(main, .stage, .slides) { margin-top: 0 !important; margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; flex: 1 1 auto !important; min-height: 0 !important; }
+html.saa-skin .app > .saa-navrow, html.saa-skin .app > :is(footer, nav).saa-navrow {
+  margin: calc(10px / var(--zz)) 0 0 !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; flex: 0 0 auto !important; }
+html.saa-skin button.saa-navtxt { min-height: calc(52px / var(--zz)) !important; padding: 0 calc(30px / var(--zz)) !important; font-size: calc(15.5px / var(--zz)) !important; }
+html.saa-skin .app { gap: 0 !important; row-gap: 0 !important; }
+/* the Back / Next row wrapped in a footer of its own: the wrapper takes game 1's spacing instead */
+html.saa-skin .app > :is(footer, nav, div):has(> .saa-navrow) { margin: calc(10px / var(--zz)) 0 0 !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; flex: 0 0 auto !important; }
+/* Practice Bot style footers (.slide-footer holds the buttons directly) get the same spacing */
+html.saa-skin .app > footer.slide-footer { margin: calc(10px / var(--zz)) 0 0 !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; }
+/* Back / Next are sized by their label, like game 1 (no game minimum widths) */
+html.saa-skin button.saa-navtxt { min-width: 0 !important; }
+/* header block as tall as game 1's (eyebrow + title), so the card starts at the same place */
+html.saa-skin .app > :is(.saa-header, header.top) { min-height: calc(41px / var(--zz)) !important; }
+/* progress: same on-screen size as game 1 in zoomed games */
+html.saa-skin .saa-prog { gap: calc(12px / var(--zz)); width: calc(min(380px, 40vw) / var(--zz)); }
+html.saa-skin .saa-prog-n { font-size: calc(12px / var(--zz)); }
+html.saa-skin .saa-prog-bar { height: calc(4px / var(--zz)); }
+
+/* Back keeps its word when a game hides both label and icon on phones */
+html.saa-skin button.saa-back.saa-back-blank::after { content: "Back"; }
+
+/* very narrow phones: the logo alone, so the header keeps room for its tools */
+@media (max-width: 400px) { html.saa-skin .saa-hd-brand .saa-wm { display: none; } }
+
+/* ---- light mode, branded like the dark frame: logo, "Swift AI / ACADEMY", section eyebrow and title in navy ---- */
+@media (min-width: 701px) { html[data-saa-themes][data-theme="light"] :is(.saa-header, header.top) { display: flex !important; align-items: center !important; gap: calc(clamp(16px, 3vw, 48px) / var(--z, 1)) !important; flex-wrap: nowrap !important; } }   /* phones keep the game's own wrapping header */
+html[data-saa-themes][data-theme="light"] :is(.saa-header, header.top) > .brand { display: none !important; }
+html[data-saa-themes][data-theme="light"] .saa-hd-brand { display: flex !important; align-items: center; gap: calc(12px / var(--z, 1)); flex: 0 0 auto; }
+html[data-saa-themes][data-theme="light"] .saa-hd-brand img, html[data-saa-themes][data-theme="light"] .saa-hd-brand .brand-mark { width: calc(30px / var(--z, 1)) !important; height: calc(27px / var(--z, 1)) !important; object-fit: contain; display: block; }
+html[data-saa-themes][data-theme="light"] .saa-wm { line-height: 1; }
+html[data-saa-themes][data-theme="light"] .saa-wm .n { display: block; font-size: calc(21px / var(--z, 1)); font-weight: 700; letter-spacing: -.02em; color: #0E1A4F; }
+html[data-saa-themes][data-theme="light"] .saa-wm .s { display: block; font-size: calc(9px / var(--z, 1)); font-weight: 600; letter-spacing: .34em; text-transform: uppercase; color: #6B76A0; margin-top: calc(3px / var(--z, 1)); }
+html[data-saa-themes][data-theme="light"] .saa-hd-ttl { display: block !important; flex: 1 1 auto; min-width: 0; }   /* takes the free space, so the tools sit on the right */
+html[data-saa-themes][data-theme="light"] .saa-hd-eb { margin: 0 0 calc(2px / var(--z, 1)); font-size: calc(11.5px / var(--z, 1)); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: #3C59F6; }
+html[data-saa-themes][data-theme="light"] .saa-hd-h { margin: 0; font-size: calc(18.72px / var(--z, 1)); font-weight: 700; letter-spacing: -.01em; color: #0E1A4F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 400px) { html[data-saa-themes][data-theme="light"] .saa-hd-brand .saa-wm { display: none; } }
+@media (max-width: 700px) { html[data-saa-themes][data-theme="light"] .saa-hd-eb { display: none; } html[data-saa-themes][data-theme="light"] .saa-hd-h { font-size: 15px; } }
+/* ==========================================================================
+   NARRATION controls + word highlight (same look as game 1's header buttons)
+   ========================================================================== */
+.saa-vo { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; flex: 0 0 auto; }
+/* a screen with no clip hides only Replay: the sound on/off (it also mutes the effects) and the theme switch stay */
+.saa-vo.none > .saa-vo-listen { display: none !important; }
+html .saa-vo + :is(.saa-header-actions, .topbar-tools, .top-actions, .header-actions, .actions), html.saa-skin .saa-vo + :is(.saa-header-actions, .topbar-tools, .top-actions, .header-actions, .actions) { margin-left: calc(8px / var(--zz, 1)) !important; }
+.saa-vo-b { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: 13px; font-weight: 600; line-height: 1;
+  color: #F6F4EF; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.16); border-radius: 999px;
+  padding: 8px 14px; min-height: 38px; cursor: pointer; transition: background .15s, border-color .15s; -webkit-user-select: none; user-select: none; }
+.saa-vo-b.icon { padding: 0; width: 38px; justify-content: center; }
+.saa-vo-b:hover { border-color: #5B76FF; }
+.saa-vo-b:focus-visible { outline: 2px solid #FFC168; outline-offset: 3px; }
+.saa-vo-b .i-pause, .saa-vo-b .i-off { display: none; }
+.saa-vo-b.playing { background: rgba(91,118,255,.16); border-color: #5B76FF; }
+.saa-vo-b.playing .i-play { display: none; }
+.saa-vo-b.playing .i-pause { display: block; }
+.saa-vo-voice[aria-pressed="false"] .i-on { display: none; }
+.saa-vo-voice[aria-pressed="false"] .i-off { display: block; }
+.saa-vo-voice[aria-pressed="false"] { color: #AEB6D4; }
+html.saa-skin .saa-vo-b { min-height: calc(38px / var(--zz, 1)); font-size: calc(13px / var(--zz, 1)); padding: calc(8px / var(--zz, 1)) calc(14px / var(--zz, 1)); }
+html.saa-skin .saa-vo-b.icon { width: calc(38px / var(--zz, 1)); padding: 0; }
+/* light games */
+html:not(.saa-skin) .saa-vo-b { color: #0E1A4F; background: #fff; border-color: #D9DEEE; }
+html:not(.saa-skin) .saa-vo-b.playing { background: #EAEEFF; border-color: #3C59F6; }
+html:not(.saa-skin) .saa-vo-voice[aria-pressed="false"] { color: #5C6690; }
+@media (max-width: 560px) { .saa-vo-listen span { display: none; } .saa-vo-listen { padding: 0; width: 38px; justify-content: center; } }
+@media print { .saa-vo { display: none !important; } }
+
+/* word highlight while the clip plays: words not yet read are dimmed, the current word is lit */
+::highlight(saa-vo-todo) { color: rgba(246,244,239,.45); }
+::highlight(saa-vo-on) { background-color: rgba(143,160,255,.34); color: #fff; }
+html:not(.saa-skin) ::highlight(saa-vo-todo) { color: rgba(14,26,79,.45); }
+html:not(.saa-skin) ::highlight(saa-vo-on) { background-color: rgba(60,89,246,.18); color: #0E1A4F; }
+@media (max-width: 560px) { html.saa-skin .saa-vo-listen { padding: 0; width: calc(38px / var(--zz, 1)); justify-content: center; } }
+
+/* phones: header narration buttons at least 44px */
+@media (max-width: 700px), (pointer: coarse) { .saa-vo-b, html.saa-skin .saa-vo-b, html.saa-skin .saa-vo-b.icon { min-height: 44px !important; min-width: 44px !important; } }
